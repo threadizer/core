@@ -3,21 +3,22 @@
 Execute code within subthread.
 
 ## Install
+The project is [published on npm](https://www.npmjs.com/package/@threadizer/core)
 ```
-	npm install @theadizer/core
+npm install @theadizer/core
 ```
 
 ## Quick start
 ```javascript
-	import Threadizer from "@threadizer/core";
+import Threadizer from "@threadizer/core";
 
-	// ...
+// ...
 
-	const subthread = new Threadizer(()=>{
+const subthread = new Threadizer(()=>{
 
-		console.log("Executed within a Worker");
+	console.log("Executed within a Worker");
 
-	});
+});
 
 ```
 
