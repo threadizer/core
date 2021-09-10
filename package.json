@@ -1,0 +1,48 @@
+{
+  "name": "@threadizer/core",
+  "version": "0.0.0",
+  "description": "Execute code in subthread",
+  "main": "test/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "webpack serve --mode development --stats-children",
+    "prepare": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/threadizer/core.git"
+  },
+  "keywords": [
+    "worker",
+    "thread",
+    "subthread",
+    "async",
+    "performance"
+  ],
+  "author": "Jordan Delcros",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/threadizer/core/issues"
+  },
+  "homepage": "https://github.com/threadizer/core#readme",
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/eslint-parser": "^7.15.4",
+    "@babel/plugin-proposal-class-properties": "^7.14.5",
+    "@babel/plugin-proposal-optional-chaining": "^7.14.5",
+    "@babel/plugin-transform-runtime": "^7.15.0",
+    "@babel/preset-env": "^7.15.6",
+    "@babel/runtime": "^7.15.4",
+    "babel-loader": "^8.2.2",
+    "core-js": "^3.17.3",
+    "eslint-webpack-plugin": "^3.0.1",
+    "html-webpack-plugin": "^5.3.2",
+    "path-browserify": "^1.0.1",
+    "webpack": "^5.52.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.2.0",
+    "webpack-shell-plugin-next": "^2.2.2"
+  }
+}
