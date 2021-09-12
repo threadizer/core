@@ -1,6 +1,6 @@
 # Threadizer
 
-Execute code within subthread.
+Execute code within worker.
 
 ## Install
 The project is [published on npm](https://www.npmjs.com/package/@threadizer/core)
