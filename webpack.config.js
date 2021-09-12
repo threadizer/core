@@ -89,7 +89,7 @@ module.exports = ( env, options )=>{
 			assetModuleFilename: "[hash][ext][query]",
 			library: {
 				type: "umd",
-				name: name
+				name: "Threadizer"
 			}
 		},
 		resolve: {
