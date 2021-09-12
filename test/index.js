@@ -1,4 +1,4 @@
-import Threadize from "@/index.js";
+import Threadizer from "@/index.js";
 
 document.addEventListener("DOMContentLoaded", async ()=>{
 
@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	const offscreenCanvas = canvas.transferControlToOffscreen();
 
-	const thread = await new Threadize(window.location.href + "worker.js");
+	const thread = await new Threadizer(window.location.href + "worker.js");
 
-	// const thread = await new Threadize(()=>{
+	// const thread = await new Threadizer(()=>{
 
 	// 	self.on("canvas", ({ detail: canvas })=>{
 

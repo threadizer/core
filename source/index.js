@@ -1,7 +1,7 @@
 import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
 
-export default class Threadize extends EventManager {
+export default class Threadizer extends EventManager {
 	#originalApplication
 	constructor( application ){
 
