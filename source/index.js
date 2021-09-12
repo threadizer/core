@@ -9,9 +9,18 @@ export default class Threadize extends EventManager {
 
 		return new Promise(async ( resolve )=>{
 
-			this.#originalApplication = application;
+			if( application instanceof Function ){
 
-			this.worker = await this.#generateWorker(application);
+				this.#originalApplication = `(${ application.toString() })()`;
+
+			}
+			else if( typeof application === "string" ){
+
+				this.#originalApplication = await fetch(application).then(response => response.text());
+
+			}
+
+			this.worker = await this.#generateWorker(this.#originalApplication);
 
 			resolve(this);
 
@@ -41,7 +50,11 @@ export default class Threadize extends EventManager {
 
 			const compiledApplication = `(function(){
 
-				(${ WorkerManager })(self).then(${ application });
+				(${ WorkerManager })(self).then(function(){
+
+					${ application }
+
+				});
 
 			})()`;
 

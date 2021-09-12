@@ -29,7 +29,7 @@ const subthread = new Threadizer(()=>{
 ## Methods
 
 ### constructor( `application` )
- - `application`: *(Function)* The application to run within the worker.
+ - `application`: *(Function|URL)* The application (Function) to run within the worker or the worker direct file itself.
 
 ### transfer( `type`, `data`, `transferable` )
 Send data as event from main thread to worker

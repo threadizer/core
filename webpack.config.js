@@ -36,13 +36,16 @@ module.exports = ( env, options )=>{
 	};
 
 	const entries = {
-		index: "./source/index.js"
+		index: "./source/index.js",
+		worker: "./test/worker.js"
 	};
+
+	console.log(BUILD_PATH);
 
 	const plugins = [
 		new WebpackShellPlugin({
 			onBeforeBuild: {
-				scripts: ["rm -rf ./build"],
+				scripts: [`rm -rf ${ BUILD_PATH }`],
 				blocking: true,
 				parallel: false
 			},
@@ -70,7 +73,7 @@ module.exports = ( env, options )=>{
 				title: name,
 				filename: "index.html",
 				template: resolve(__dirname, "test/index.html"),
-				excludeChunks: ["index"]
+				excludeChunks: ["index", "worker"]
 			})
 		);
 
@@ -94,7 +97,7 @@ module.exports = ( env, options )=>{
 			alias: {
 				"~": resolve(__dirname, "./"),
 				"@": resolve(__dirname, "./source"),
-				"ø": resolve(__dirname, "./test")
+				"†": resolve(__dirname, "./test")
 			},
 			fallback: {
 				path: require.resolve("path-browserify")

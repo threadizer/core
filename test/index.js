@@ -8,26 +8,28 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	const offscreenCanvas = canvas.transferControlToOffscreen();
 
-	const thread = await new Threadize(()=>{
+	const thread = await new Threadize(window.location.href + "worker.js");
 
-		self.on("canvas", ({ detail: canvas })=>{
+	// const thread = await new Threadize(()=>{
 
-			const context = canvas.getContext("2d");
+	// 	self.on("canvas", ({ detail: canvas })=>{
 
-			context.fillRect(0, 0, canvas.width, canvas.height);
+	// 		const context = canvas.getContext("2d");
 
-			Object.assign(context, {
-				fillStyle: "#FFF",
-				font: "13px sans-serif",
-				textAlign: "center",
-				textBaseline: "middle"
-			});
+	// 		context.fillRect(0, 0, canvas.width, canvas.height);
 
-			context.fillText("OffscreenCanvas painted within a subthread", canvas.width / 2, canvas.height / 2, canvas.width);
+	// 		Object.assign(context, {
+	// 			fillStyle: "#FFF",
+	// 			font: "13px sans-serif",
+	// 			textAlign: "center",
+	// 			textBaseline: "middle"
+	// 		});
 
-		});
+	// 		context.fillText("OffscreenCanvas painted within a subthread", canvas.width / 2, canvas.height / 2, canvas.width);
 
-	});
+	// 	});
+
+	// });
 
 	thread.transfer("canvas", offscreenCanvas, [offscreenCanvas]);
 
