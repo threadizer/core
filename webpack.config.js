@@ -53,10 +53,7 @@ module.exports = ( env, options )=>{
 				parallel: false
 			}
 		}),
-		new WebpackESLintPlugin({
-			extensions: ["js"],
-			exclude: ["/node_modules"]
-		})
+		new WebpackESLintPlugin()
 	];
 
 	if( IS_DEV ){
