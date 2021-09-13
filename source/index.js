@@ -2,7 +2,7 @@ import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
 
 export default class Threadizer extends EventManager {
-	constructor( application ){
+	constructor( application, extension ){
 
 		super();
 
@@ -12,7 +12,7 @@ export default class Threadizer extends EventManager {
 
 				application = await Threadizer.generateApplicationString(application);
 
-				await this.setApplication(application);
+				await this.setApplication(application, extension);
 
 			}
 
@@ -21,9 +21,9 @@ export default class Threadizer extends EventManager {
 		});
 
 	}
-	async setApplication( application ){
+	async setApplication( application, extension ){
 
-		this.worker = await this.#generateWorker(application);
+		this.worker = await this.#generateWorker(application, extension);
 
 		return this;
 
@@ -42,13 +42,13 @@ export default class Threadizer extends EventManager {
 		return this;
 
 	}
-	#generateWorker( application ){
+	#generateWorker( application, extension ){
 
 		return new Promise(( resolve )=>{
 
 			const compiledApplication = `(function(){
 
-				(${ WorkerManager })(self).then(function(){
+				(${ WorkerManager })(self, ${ extension }).then(function(){
 
 					${ application }
 

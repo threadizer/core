@@ -1,6 +1,6 @@
-export default function( self ){
+export default function( self, extension ){
 
-	return new Promise(( resolve )=>{
+	return new Promise(async ( resolve )=>{
 
 		const events = new Array();
 
@@ -52,6 +52,14 @@ export default function( self ){
 			self.dispatch(type, { detail: data });
 
 		});
+
+		const extending = extension?.(self);
+
+		if( extending instanceof Promise ){
+
+			await extending;
+
+		}
 
 		self.transfer("worker-ready");
 
