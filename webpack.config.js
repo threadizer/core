@@ -40,8 +40,6 @@ module.exports = ( env, options )=>{
 		worker: "./test/worker.js"
 	};
 
-	console.log(BUILD_PATH);
-
 	const plugins = [
 		new WebpackShellPlugin({
 			onBeforeBuild: {

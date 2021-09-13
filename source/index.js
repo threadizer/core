@@ -2,46 +2,44 @@ import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
 
 export default class Threadizer extends EventManager {
-	#originalApplication
 	constructor( application ){
 
 		super();
 
 		return new Promise(async ( resolve )=>{
 
-			if( application instanceof Function ){
+			if( application ){
 
-				this.#originalApplication = `(${ application.toString() })()`;
+				application = await Threadizer.generateApplicationString(application);
 
-			}
-			else if( typeof application === "string" ){
-
-				this.#originalApplication = await fetch(application).then(response => response.text());
+				await this.setApplication(application);
 
 			}
-
-			this.worker = await this.#generateWorker(this.#originalApplication);
 
 			resolve(this);
 
 		});
 
 	}
+	async setApplication( application ){
+
+		this.worker = await this.#generateWorker(application);
+
+		return this;
+
+	}
 	transfer( type, data, transferable ){
 
 		this.worker.postMessage({ type, data }, transferable);
 
-	}
-	reset(){
-
-		this.destroy();
-
-		this.#generateWorker(this.#originalApplication);
+		return this;
 
 	}
 	destroy(){
 
 		this.worker?.terminate();
+
+		return this;
 
 	}
 	#generateWorker( application ){
@@ -75,6 +73,22 @@ export default class Threadizer extends EventManager {
 			});
 
 		});
+
+		return this;
+
+	}
+	static async generateApplicationString( application ){
+
+		if( application instanceof Function ){
+
+			return `(${ application.toString() })()`;
+
+		}
+		else if( typeof application === "string" ){
+
+			return await fetch(application).then(response => response.text());
+
+		}
 
 	}
 }
