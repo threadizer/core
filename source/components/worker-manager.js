@@ -38,9 +38,9 @@ export default function( self, extension ){
 				self.dispatchEvent(new CustomEvent(type, options));
 
 			},
-			transfer( type, data ){
+			transfer( type, data, transferable ){
 
-				self.postMessage({ type, data }, data ? [data] : undefined);
+				self.postMessage({ type, data }, transferable);
 
 			}
 		});

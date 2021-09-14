@@ -2,6 +2,7 @@ import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
 
 export default class Threadizer extends EventManager {
+	#application = null;
 	constructor( application, extension ){
 
 		super();
@@ -10,9 +11,8 @@ export default class Threadizer extends EventManager {
 
 			if( application ){
 
-				application = await Threadizer.generateApplicationString(application);
-
-				await this.setApplication(application, extension);
+				await this.compile(application, extension);
+				await this.run();
 
 			}
 
@@ -21,9 +21,35 @@ export default class Threadizer extends EventManager {
 		});
 
 	}
-	async setApplication( application, extension ){
+	async compile( application, extension ){
 
-		this.worker = await this.#generateWorker(application, extension);
+		if( application instanceof Function ){
+
+			application = `(${ application.toString() })()`;
+
+		}
+		else if( typeof application === "string" ){
+
+			application = await fetch(application).then(response => response.text());
+
+		}
+
+		this.#application = `(function(){
+
+			(${ WorkerManager })(self, ${ extension }).then(function(){
+
+				${ application }
+
+			});
+
+		})()`;
+
+		return this.#application;
+
+	}
+	async run( application = this.#application ){
+
+		this.worker = await this.#generateWorker(application);
 
 		return this;
 
@@ -42,21 +68,11 @@ export default class Threadizer extends EventManager {
 		return this;
 
 	}
-	#generateWorker( application, extension ){
+	#generateWorker( application ){
 
 		return new Promise(( resolve )=>{
 
-			const compiledApplication = `(function(){
-
-				(${ WorkerManager })(self, ${ extension }).then(function(){
-
-					${ application }
-
-				});
-
-			})()`;
-
-			const blob = new Blob([compiledApplication], { type: "text/javascript" });
+			const blob = new Blob([application], { type: "text/javascript" });
 
 			const url = URL.createObjectURL(blob);
 
@@ -75,20 +91,6 @@ export default class Threadizer extends EventManager {
 		});
 
 		return this;
-
-	}
-	static async generateApplicationString( application ){
-
-		if( application instanceof Function ){
-
-			return `(${ application.toString() })()`;
-
-		}
-		else if( typeof application === "string" ){
-
-			return await fetch(application).then(response => response.text());
-
-		}
 
 	}
 }

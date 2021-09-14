@@ -28,8 +28,18 @@ const subthread = new Threadizer(()=>{
  
 ## Methods
 
-### constructor( `application` )
- - `application`: *(Function|URL)* The application (Function) to run within the worker or the worker direct file itself.
+### constructor( `application`, `extension` )
+Leave `application` empty if you dont want the worker to be automaticaly created.
+
+ - `application`: *(Function|URL)* **Optional** The application (Function) to run within the worker or the worker direct file itself.
+ - `extension`: *(Function)* **Optional** Function launched to extends the worker-manager (add global methods, libraries, variables, ...).
+
+### async setApplication( application, extension )
+Prepare and run the application within the worker.
+That method is called by the constructor if `application` is defined or you can call it at any moment.
+
+ - `application`: *(Function|URL)* **Optional** The application (Function) to run within the worker or the worker direct file itself.
+ - `extension`: *(Function)* **Optional** Function launched to extends the worker-manager (add global methods, libraries, variables, ...).
 
 ### transfer( `type`, `data`, `transferable` )
 Send data as event from main thread to worker
