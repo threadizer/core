@@ -10,11 +10,14 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	const thread = await new Threadizer(window.location.href + "worker.js");
 
-	// Same things but inline
+	// Same but forced in main thread
+	// const thread = await new Threadizer(window.location.href + "worker.js", undefined, true);
+
+	// Same but inline
 	/*
 	const thread = await new Threadizer(()=>{
 
-		self.on("canvas", ({ detail: canvas })=>{
+		thread.on("canvas", ({ detail: canvas })=>{
 
 			const context = canvas.getContext("2d");
 
@@ -33,6 +36,12 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	});
 	*/
+
+	thread.on("rendered", ()=>{
+
+		console.log("MAIN THREAD - Canvas has been rendered");
+
+	});
 
 	thread.transfer("canvas", offscreenCanvas, [offscreenCanvas]);
 

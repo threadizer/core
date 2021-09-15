@@ -1,10 +1,17 @@
 export default function( self, extension ){
 
+	self.thread = self;
+
 	return new Promise(async ( resolve )=>{
 
 		const events = new Array();
 
 		Object.assign(self, {
+			get isWorker(){
+
+				return typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+
+			},
 			on( type, action ){
 
 				if( !events.find(event => event.type === type && event.action === action) ){

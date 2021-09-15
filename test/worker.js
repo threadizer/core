@@ -1,4 +1,6 @@
-self.on("canvas", ({ detail: canvas })=>{
+thread.on("canvas", ({ detail: canvas })=>{
+
+	const text = thread.isWorker ? "OffscreenCanvas painted within a worker" : "OffscreenCanvas painted within main thread";
 
 	const context = canvas.getContext("2d");
 
@@ -11,6 +13,8 @@ self.on("canvas", ({ detail: canvas })=>{
 		textBaseline: "middle"
 	});
 
-	context.fillText("OffscreenCanvas painted within a subthread", canvas.width / 2, canvas.height / 2, canvas.width);
+	context.fillText(text, canvas.width / 2, canvas.height / 2, canvas.width);
+
+	thread.transfer("rendered");
 
 });
