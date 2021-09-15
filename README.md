@@ -1,6 +1,6 @@
 # Threadizer
 
-Execute code within worker (or main thread as fallback).
+Execute code within a worker (or main thread as fallback).
 
 ## Install
 The project is [published on npm](https://www.npmjs.com/package/@threadizer/core)
