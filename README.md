@@ -33,7 +33,7 @@ const subthread = new Threadizer(()=>{
 #### constructor( `application`, `extension`, `insideMainThread` )
 Leave `application` empty if you dont want the worker to be automaticaly created.
 
-`application`: *(Function|URL)* **Optional** The application (Function) to run within the worker or the worker direct file itself.
+ - `application`: *(Function|URL)* **Optional** The application (Function) to run within the worker or the worker direct file itself.
  - `extension`: *(Function)* **Optional** Function launched to extends the worker-manager (add global methods, libraries, variables, ...).
  - `insideMainThread`: *(Boolean)* **Optional** Set to `true` if the application must run in main thread (no Worker involved). Default `false`.
 
