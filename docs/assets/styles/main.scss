@@ -1,0 +1,135 @@
+@import "†/assets/styles/reset.scss";
+@import "†/assets/styles/fonts.scss";
+@import "†/assets/styles/code-highlight.scss";
+
+$blue: #456DA0;
+$clear: #EFEFEF;
+$dark: #222;
+
+html {
+	font-family: "Fira Code";
+	font-size: 10px;
+	background-color: $blue;
+
+	body {
+		padding-bottom: 10rem;
+		background-color: $clear;
+
+		.logo {
+			height: 70vh;
+			background: $blue;
+
+			header {
+				height: 100%;
+
+				h1 {
+					position: absolute;
+					color: transparent;
+
+					&::selection {
+						opacity: 0;
+					}
+				}
+
+				canvas {
+					display: block;
+					width: 100%;
+					height: 100%;
+				}
+			}
+
+			pre {
+				display: none;
+				box-sizing: border-box;
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				border-radius: 0;
+				overflow: auto;
+			}
+
+			.toggle-code {
+				position: absolute;
+				right: 1.5rem;
+				bottom: 1.5rem;
+				width: 3rem;
+				height: 3rem;
+				border-radius: 2.5rem;
+				background-color: rgba(#FFF, 0.5);
+				cursor: pointer;
+
+				&:hover {
+					background-color: rgba(#FFF, 0.8);
+				}
+
+				&::before,
+				&::after {
+					position: absolute;
+					left: 50%;
+					top: 50%;
+					display: block;
+					font-size: 1.5rem;
+					color: $blue;
+				}
+
+				&::before {
+					content: "<";
+					transform: translate(-100%, -50%);
+				}
+
+				&::after {
+					content: ">";
+					transform: translate(0%, -50%);
+				}
+			}
+
+			&.show-code pre {
+				display: block;
+			}
+		}
+
+		main {
+			margin: 0 auto;
+			padding: 0 50px;
+			max-width: 850px;
+
+			section {
+				margin-top: 8rem;
+
+				h2 {
+					font-family: "Fira Code Bolder";
+					font-size: 3rem;
+					color: #333;
+				}
+
+				.content {
+					margin: 2rem auto 0 auto;
+
+					p {
+						font-size: 1.5rem;
+						line-height: 3rem;
+						letter-spacing: -0.1rem;
+
+						a {
+							color: $blue;
+						}
+					}
+
+					pre {
+						margin-top: 2rem;
+					}
+
+					.tabs {
+						margin-top: 2rem;
+
+						pre {
+							margin-top: 0;
+						}
+					}
+				}
+			}
+		}
+	}
+}

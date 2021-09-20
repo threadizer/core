@@ -1,8 +1,10 @@
 const { hostname } = require("os");
 const { resolve } = require("path");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
-const WebpackESLintPlugin = require("eslint-webpack-plugin");
 const WebpackShellPlugin = require("webpack-shell-plugin-next");
+const WebpackMiniCssExtractPlugin = require("mini-css-extract-plugin");
+const WebpackCopyPlugin = require("copy-webpack-plugin");
+const WebpackESLintPlugin = require("eslint-webpack-plugin");
 const { name, version } = require("./package.json");
 
 module.exports = ( env, options )=>{
@@ -37,7 +39,7 @@ module.exports = ( env, options )=>{
 
 	const entries = {
 		index: "./source/index.js",
-		worker: "./test/worker.js"
+		// worker: "./docs/worker.js"
 	};
 
 	const plugins = [
@@ -53,22 +55,32 @@ module.exports = ( env, options )=>{
 				parallel: false
 			}
 		}),
+		new WebpackCopyPlugin({
+			patterns: [
+				{ from: "docs/assets/vendors", to: "./" }
+			]
+		}),
 		new WebpackESLintPlugin()
 	];
 
 	if( IS_DEV ){
 
 		Object.assign(entries, {
-			test: "./test/index.js"
+			docs: "./docs/index.js"
 		});
 
 		plugins.push(
+			new WebpackMiniCssExtractPlugin(),
 			new HTMLWebpackPlugin({
 				publicPath: "./",
 				title: name,
 				filename: "index.html",
-				template: resolve(__dirname, "test/index.html"),
-				excludeChunks: ["index", "worker"]
+				template: resolve(__dirname, "docs/index.html"),
+				meta: {
+					viewport: "width=device-width, initial-scale=1"
+				},
+				excludeChunks: ["index"/*, "worker"*/],
+				xhtml: true
 			})
 		);
 
@@ -92,7 +104,7 @@ module.exports = ( env, options )=>{
 			alias: {
 				"~": resolve(__dirname, "./"),
 				"@": resolve(__dirname, "./source"),
-				"†": resolve(__dirname, "./test")
+				"†": resolve(__dirname, "./docs")
 			},
 			fallback: {
 				path: require.resolve("path-browserify")
@@ -106,6 +118,24 @@ module.exports = ( env, options )=>{
 					use: [
 						"babel-loader"
 					]
+				},
+				{
+					test: /\.scss$/,
+					exclude: /node_modules/,
+					use: [
+						WebpackMiniCssExtractPlugin.loader,
+						{
+							loader: "css-loader",
+							options: {
+								esModule: false
+							}
+						},
+						"sass-loader"
+					]
+				},
+				{
+					test: /\.woff2/,
+					type: "asset/resource"
 				}
 			]
 		},

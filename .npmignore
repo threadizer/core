@@ -2,6 +2,7 @@
 Thumbs.db
 *.log
 *.tmp
+.npmrc
 node_modules/
 build/
-.npmrc
+docs/

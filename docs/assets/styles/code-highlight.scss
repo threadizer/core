@@ -1,0 +1,167 @@
+$text-color: #DDD;
+$background-color: #2E2E2E;
+$background-color-light: #3E3E3E;
+
+.hljs-inline {
+	display: inline-block;
+	height: 2rem;
+	line-height: 2rem;
+	vertical-align: middle;
+	border-radius: 2rem;
+	padding: 0.2rem 1.2rem;
+	font-size: 1.3rem;
+	color: $text-color;
+	background-color: $background-color-light;
+}
+
+pre {
+	border-radius: 1rem;
+	tab-size: 3rem;
+	padding: 4rem;
+	font-family: "Fira Code";
+	font-size: 1.5rem;
+
+	&:not(.full) {
+		display: inline-block;
+	}
+
+	&[data-script] {
+
+		& + .run-code {
+			z-index: 999;
+			position: absolute;
+			right: 1.5rem;
+			bottom: 1.5rem;
+			width: 3rem;
+			height: 3rem;
+			border-radius: 2.5rem;
+			background-color: rgba($text-color, 0.5);
+			cursor: pointer;
+
+			&:hover {
+				background-color: rgba($text-color, 0.8);
+			}
+
+			&::before {
+				content: "►";
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				display: block;
+				font-size: 1.8rem;
+				color: $background-color;
+				transform: translate(-36%, -50%);
+			}
+		}
+	}
+}
+
+.tabs {
+
+	ul {
+		margin-left: 2rem;
+		display: flex;
+		flex-direction: row;
+
+		li {
+			display: inline-block;
+			margin-right: 0.2rem;
+			padding: 0.8rem 2rem;
+			border-top-left-radius: 1rem;
+			border-top-right-radius: 1rem;
+			font-size: 1.5rem;
+			color: #DDD;
+			background-color: $background-color-light;
+			cursor: pointer;
+
+			&.current {
+				background-color: $background-color;
+				cursor: normal;
+			}
+		}
+	}
+
+	pre {
+		margin-top: 0;
+	}
+}
+
+/* Monokai Theme */
+.hljs {
+	display: block;
+	overflow-x: auto;
+	background: $background-color;
+	color: #DDD;
+
+	&-keyword,
+	&-literal,
+	&-name,
+	&-selector-tag,
+	&-strong,
+	&-tag {
+		color: #F92672;
+	}
+
+	&-code {
+		color:#66d9ef;
+	}
+
+	&-class &-title { 
+		color: #FFF;
+	}
+
+	&-attribute,
+	&-link,
+	&-regexp,
+	&-symbol{
+		color: #BF79DB;
+	}
+
+	&-addition,
+	&-built_in,
+	&-builtin-name,
+	&-bullet,
+	&-emphasis,
+	&-section,
+	&-selector-attr,
+	&-selector-pseudo,
+	&-subst,
+	&-template-tag,
+	&-template-variable,
+	&-title,
+	&-type,
+	&-variable {
+		color: #A6E22E;
+
+		&.language_,
+		&.function_ {
+			color: #66D9EF;
+		}
+
+		&.language_ {
+			font-style: italic;
+		}
+	}
+
+	&-string {
+		color: #E6DB74;
+	}
+
+	&-comment,
+	&-deletion,
+	&-meta,
+	&-quote{
+		color: #75715E;
+	}
+
+	&-doctag,
+	&-keyword,
+	&-literal,
+	&-section,
+	&-selector-id,
+	&-selector-tag,
+	&-title,
+	&-type {
+		font-weight: 700;
+	}
+}
