@@ -4,15 +4,15 @@ export default async ( container )=>{
 
 	const canvas = document.createElement("canvas");
 
+	const supports = canvas.transferControlToOffscreen instanceof Function;
+
 	container.appendChild(canvas);
 
-	// Convert Canvas into OffscreenCanvas
-	const offscreenCanvas = canvas.transferControlToOffscreen();
+	// Convert canvas into offscreen canvas if supported.
+	const offscreenCanvas = supports ? canvas.transferControlToOffscreen() : canvas;
 
-	const thread = await new Threadizer(()=>{
-
-		// Import ThreeJS WebGL library
-		importScripts(location.origin + "/vendors/three.min.js");
+	// Call a thread if "supports" is true, run on main-thread if not (see 3rd parameter) at the end.
+	const thread = await new Threadizer(( thread )=>{
 
 		const duration = 1000;
 		const delay = 1000;
@@ -24,57 +24,75 @@ export default async ( container )=>{
 		let group = null;
 		let scene = null;
 		let top = null;
+		let middle = null;
+		let moving = null;
 		let bottom = null;
 		let width = 0;
 		let height = 0;
 		let animationStart = 0;
-		let animationPositionStart = new THREE.Vector3();
-		let animationPositionEnd = new THREE.Vector3();
-		let movePositionTarget = new THREE.Vector3();
-		let moveRotationTarget = new THREE.Vector3();
+		let animationPositionStart = null;
+		let animationPositionEnd = null;
+		let movePositionTarget = null;
+		let moveRotationTarget = null;
 
-		function generatePlane( colors ){
+		// Listen to the "canvas" event from main thread
+		thread.on("setup", ({ detail })=>{
 
-			const width = 0.25;
-			const height = 0.5;
-			const skew = 0.25;
+			console.log("setup", self, thread);
 
-			const vertices = new Float32Array([
-				+width + skew, +height, 0,
-				-width + skew, +height, 0,
-				-width - skew, -height, 0,
-				+width - skew, -height, 0
-			]);
+			const { offscreenCanvas, baseURL } = detail;
 
-			const geometry = new THREE.BufferGeometry();
+			// Import ThreeJS WebGL library if inside a worker
+			if( thread.isWorker ){
 
-			geometry.setIndex([0, 1, 2, 3, 0, 2]);
-			geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-
-			geometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3));
-
-			for( let index = 0; index < colors.length; index++ ){
-
-				geometry.attributes.color.setXYZ(index, colors[index].r, colors[index].g, colors[index].b);
+				importScripts(baseURL + "/vendors/three.min.js");
 
 			}
 
-			const material = new THREE.MeshBasicMaterial({
-				vertexColors: true,
-				transparent: true,
-				depthTest: false
-			});
+			animationPositionStart = new THREE.Vector3();
+			animationPositionEnd = new THREE.Vector3();
+			movePositionTarget = new THREE.Vector3();
+			moveRotationTarget = new THREE.Vector3();
 
-			material.blending = THREE.AdditiveBlending;
+			function generatePlane( colors ){
 
-			const mesh = new THREE.Mesh(geometry, material);
+				const width = 0.25;
+				const height = 0.5;
+				const skew = 0.25;
 
-			return mesh;
+				const vertices = new Float32Array([
+					+width + skew, +height, 0,
+					-width + skew, +height, 0,
+					-width - skew, -height, 0,
+					+width - skew, -height, 0
+				]);
 
-		}
+				const geometry = new THREE.BufferGeometry();
 
-		// Listen to the "canvas" event from main thread
-		self.on("setCanvas", ({ detail: offscreenCanvas })=>{
+				geometry.setIndex([0, 1, 2, 3, 0, 2]);
+				geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+
+				geometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3));
+
+				for( let index = 0; index < colors.length; index++ ){
+
+					geometry.attributes.color.setXYZ(index, colors[index].r, colors[index].g, colors[index].b);
+
+				}
+
+				const material = new THREE.MeshBasicMaterial({
+					vertexColors: true,
+					transparent: true,
+					depthTest: false
+				});
+
+				material.blending = THREE.AdditiveBlending;
+
+				const mesh = new THREE.Mesh(geometry, material);
+
+				return mesh;
+
+			}
 
 			renderer = new THREE.WebGLRenderer({
 				canvas: offscreenCanvas,
@@ -181,7 +199,7 @@ export default async ( container )=>{
 		});
 
 		// Listen to the "mousemove" event from main thread
-		self.on("move", ({ detail: move })=>{
+		thread.on("move", ({ detail: move })=>{
 
 			const x = -((move.clientX / width) * 2 - 1);
 			const y = -((move.clientY / height) * 2 - 1);
@@ -192,7 +210,7 @@ export default async ( container )=>{
 		});
 
 		// Listen to the "resize" event from main thread
-		self.on("setSize", ({ detail: size })=>{
+		thread.on("setSize", ({ detail: size })=>{
 
 			width = size.width;
 			height = size.height;
@@ -212,10 +230,10 @@ export default async ( container )=>{
 
 		});
 
-	});
+	}, null, !supports);
 
-	// Transfer offscreencanvas to worker thread through a "setCanvas" event
-	thread.transfer("setCanvas", offscreenCanvas, [offscreenCanvas]);
+	// Transfer offscreencanvas to worker thread through a "setup" event
+	thread.transfer("setup", { offscreenCanvas, baseURL: window.location.href }, [offscreenCanvas]);
 
 	// Transfer resize event to worker thread through a "setSize" event
 	window.addEventListener("resize", ()=>{

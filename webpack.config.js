@@ -38,7 +38,7 @@ module.exports = ( env, options )=>{
 	};
 
 	const entries = {
-		index: "./source/index.js"
+		"page-source": "./page-source/index.js"
 	};
 
 	const plugins = [
@@ -60,31 +60,21 @@ module.exports = ( env, options )=>{
 				{ from: "page-source/assets/vendors", to: "./vendors" }
 			]
 		}),
+		new WebpackMiniCssExtractPlugin(),
+		new HTMLWebpackPlugin({
+			publicPath: "./",
+			title: name,
+			filename: "index.html",
+			template: resolve(__dirname, "page-source/index.html"),
+			meta: {
+				viewport: "width=device-width, initial-scale=1"
+			},
+			excludeChunks: ["index"/*, "worker"*/],
+			minify: false,
+			xhtml: true
+		}),
 		new WebpackESLintPlugin()
 	];
-
-	if( IS_DEV ){
-
-		Object.assign(entries, {
-			"page-source": "./page-source/index.js"
-		});
-
-		plugins.push(
-			new WebpackMiniCssExtractPlugin(),
-			new HTMLWebpackPlugin({
-				publicPath: "./",
-				title: name,
-				filename: "index.html",
-				template: resolve(__dirname, "page-source/index.html"),
-				meta: {
-					viewport: "width=device-width, initial-scale=1"
-				},
-				excludeChunks: ["index"/*, "worker"*/],
-				xhtml: true
-			})
-		);
-
-	}
 
 	return {
 		mode: options.mode,

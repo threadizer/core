@@ -8,8 +8,8 @@
   },
   "scripts": {
     "start": "npm run clean && webpack serve --mode development --stats-children",
-    "prepare": "npm run clean &&webpack --mode production",
-    "clean": "rm -rf ./build"
+    "prepare": "npm run clean && webpack --mode production",
+    "clean": "rm -rf ./docs"
   },
   "repository": {
     "type": "git",

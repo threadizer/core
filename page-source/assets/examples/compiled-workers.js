@@ -4,13 +4,19 @@ export default async ( unmount )=>{
 
 	const thread = await new Threadizer(()=>{
 
-		importScripts(location.origin + "/vendors/three.min.js");
+		self.on("setup", ({ detail: baseURL })=>{
 
-		console.log(THREE);
+			importScripts(baseURL + "/vendors/three.min.js");
 
-		thread.transfer("complete");
+			console.log(THREE);
+
+			self.transfer("complete");
+
+		});
 
 	});
+
+	thread.transfer("setup", window.location.href);
 
 	thread.on("complete", ()=>{
 

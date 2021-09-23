@@ -4,11 +4,11 @@ export default async ( unmount )=>{
 
 	const thread = await new Threadizer(()=>{
 
-		thread.on("custom-event", ( event )=>{
+		self.on("custom-event", ( event )=>{
 
-			console.log(thread, event.detail);
+			console.log(self, event.detail);
 
-			thread.transfer("complete");
+			self.transfer("complete");
 
 		});
 
