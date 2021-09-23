@@ -5,7 +5,8 @@
 		<meta charset="utf-8"/>
 		<title>@threadizer/core</title>
 		<meta name="description" content="Run code within workers."/>
-		<script src="./vendors/three.min.js"></script>
+		<link rel="shortcut icon" href="./favicon.ico">
+		<script src="./three.min.js"></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1"/><script defer="defer" src="./page-source.js"></script><link href="./page-source.css" rel="stylesheet"/></head>
 	<body>
 		<div class="logo">
@@ -23,9 +24,10 @@
 
 					container.appendChild(canvas);
 
-					// Convert Canvas into OffscreenCanvas
+					// Convert canvas into offscreen canvas if supported.
 					const offscreenCanvas = supports ? canvas.transferControlToOffscreen() : canvas;
 
+					// Call a thread if "supports" is true, run on main-thread if not (see 3rd parameter) at the end.
 					const thread = await new Threadizer(( thread )=>{
 
 						const duration = 1000;
@@ -56,9 +58,9 @@
 
 							const { offscreenCanvas, baseURL } = detail;
 
-							if( !self.THREE ){
+							// Import ThreeJS WebGL library if inside a worker
+							if( thread.isWorker ){
 
-								// Import ThreeJS WebGL library
 								importScripts(baseURL + "/vendors/three.min.js");
 
 							}
@@ -400,7 +402,7 @@
 			</section>
 		</main>
 		<footer>
-			<img src="./images/logo.png" alt="Threadizer logo representing a colorfull lightning."/>
+			<img src="./logo.png" alt="Threadizer logo representing a colorfull lightning."/>
 			<p>Copyright (c) 2021 Threadizer — <a href="https://github.com/threadizer/core/blob/main/LICENSE" target="_blank" rel="noopener">Licensed</a></p>
 		</footer>
 	</body>

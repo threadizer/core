@@ -45,7 +45,7 @@ export default async ( container )=>{
 			// Import ThreeJS WebGL library if inside a worker
 			if( thread.isWorker ){
 
-				importScripts(baseURL + "/vendors/three.min.js");
+				importScripts(baseURL + "/three.min.js");
 
 			}
 

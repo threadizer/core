@@ -56,8 +56,8 @@ module.exports = ( env, options )=>{
 		}),
 		new WebpackCopyPlugin({
 			patterns: [
-				{ from: "page-source/assets/images", to: "./images" },
-				{ from: "page-source/assets/vendors", to: "./vendors" }
+				{ from: "page-source/assets/images", to: "./" },
+				{ from: "page-source/assets/vendors", to: "./" }
 			]
 		}),
 		new WebpackMiniCssExtractPlugin(),
