@@ -14,13 +14,14 @@ import Threadizer from "@threadizer/core";
 
 // ...
 
-const subthread = new Threadizer(()=>{
+const thread = new Threadizer(( thread )=>{
 
-    console.log("Executed within a Worker");
+    console.log("Executed within a Worker", thread);
 
 });
 
 ```
+See more on the [github page](https://threadizer.github.io/core/)
 
 ## Class
 
