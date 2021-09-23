@@ -11,7 +11,7 @@ module.exports = ( env, options )=>{
 
 	const IS_DEV = options.mode === "development";
 
-	const BUILD_PATH = resolve(__dirname, "build");
+	const BUILD_PATH = resolve(__dirname, "docs");
 
 	const HOST = hostname().toLowerCase();
 
@@ -56,8 +56,8 @@ module.exports = ( env, options )=>{
 		}),
 		new WebpackCopyPlugin({
 			patterns: [
-				{ from: "docs/assets/images", to: "./images" },
-				{ from: "docs/assets/vendors", to: "./vendors" }
+				{ from: "page-source/assets/images", to: "./images" },
+				{ from: "page-source/assets/vendors", to: "./vendors" }
 			]
 		}),
 		new WebpackESLintPlugin()
@@ -66,7 +66,7 @@ module.exports = ( env, options )=>{
 	if( IS_DEV ){
 
 		Object.assign(entries, {
-			docs: "./docs/index.js"
+			"page-source": "./page-source/index.js"
 		});
 
 		plugins.push(
@@ -75,7 +75,7 @@ module.exports = ( env, options )=>{
 				publicPath: "./",
 				title: name,
 				filename: "index.html",
-				template: resolve(__dirname, "docs/index.html"),
+				template: resolve(__dirname, "page-source/index.html"),
 				meta: {
 					viewport: "width=device-width, initial-scale=1"
 				},
@@ -104,7 +104,7 @@ module.exports = ( env, options )=>{
 			alias: {
 				"~": resolve(__dirname, "./"),
 				"@": resolve(__dirname, "./source"),
-				"†": resolve(__dirname, "./docs")
+				"†": resolve(__dirname, "./page-source")
 			},
 			fallback: {
 				path: require.resolve("path-browserify")
