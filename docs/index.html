@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<meta charset="utf-8"/>
 		<title><%= htmlWebpackPlugin.options.title %></title>
+		<meta name="description" content="Run code within workers."/>
+		<script src="/vendors/three.min.js"></script>
 	</head>
 	<body>
 		<div class="logo">
@@ -47,7 +50,7 @@
 
 						function generatePlane( colors ){
 
-							const width = 0.3;
+							const width = 0.25;
 							const height = 0.5;
 							const skew = 0.25;
 
@@ -123,10 +126,18 @@
 								new THREE.Color(0xA799EB),
 								new THREE.Color(0xFB7FAC),
 								new THREE.Color(0xFA929E)
+							]);
+
+							moving = generatePlane([
+								new THREE.Color(0x90A7EF),
+								new THREE.Color(0xA799EB),
+								new THREE.Color(0xFB7FAC),
+								new THREE.Color(0xFA929E)
 							]); 
 
 							group.add(top);
 							group.add(middle);
+							group.add(moving);
 							group.add(bottom);
 
 							setInterval(()=>{
@@ -136,7 +147,7 @@
 								animationPositionStart = random ? top.position.clone() : bottom.position.clone();
 								animationPositionEnd = random ? bottom.position.clone() : top.position.clone();
 
-								middle.position.copy(animationPositionStart);
+								moving.position.copy(animationPositionStart);
 
 								animationStart = performance.now();
 
@@ -154,17 +165,17 @@
 
 									const easeProgress = progress * (2 - progress);
 
-									top.position.set(easeProgress * -0.1, easeProgress * 0.3, 0.5);
-									bottom.position.set(easeProgress * 0.1, easeProgress * -0.3, -0.5);
+									top.position.set(easeProgress * -0.05, easeProgress * 0.3, 0.2);
+									bottom.position.set(easeProgress * 0.05, easeProgress * -0.3, -0.2);
 
 									const animationProgress = Math.min(1, (now - animationStart) / duration);
 									const animationEaseProgress = animationProgress < 0.5 ? (2 * animationProgress * animationProgress) : (-1 + (4 - 2 * animationProgress) * animationProgress);
 
 									const animationDelta = animationPositionEnd.clone().sub(animationPositionStart).multiplyScalar(animationEaseProgress);
 
-									middle.position.copy(animationPositionStart).add(animationDelta);
+									moving.position.copy(animationPositionStart).add(animationDelta);
 
-									middle.material.opacity = 1 - Math.abs(animationProgress * 2 - 1);
+									moving.material.opacity = 1 - Math.abs(animationProgress * 2 - 1);
 
 								}
 
@@ -204,7 +215,7 @@
 							renderer.setSize(size.width, size.height, false);
 							renderer.setPixelRatio(size.pixelRatio);
 
-							const frustum = 2.5;
+							const frustum = 3;
 							const aspect = size.width / size.height;
 
 							camera.left = frustum * aspect / - 2;
@@ -248,7 +259,7 @@
 			<section>
 				<h2>Install</h2>
 				<div class="content">
-					<p>The package is published on <a href="https://www.npmjs.com/package/@threadizer/core" target="_blank">npm</a>.</p>
+					<p>The package is published on <a href="https://www.npmjs.com/package/@threadizer/core" target="_blank" rel="noopener">npm</a>.</p>
 					<pre class="bash">npm install @threadizer/core</pre>
 				</div>
 			</section>
@@ -273,32 +284,107 @@
 
 						thread.transfer("custom-event", buffer, [buffer]);
 					</pre>
-					<a class="run-code"></a>
+					<a class="run-code console"></a>
 				</div>
 			</section>
 			<section>
-				<h2>Compiled workers</h2>
+				<h2>Importing external libraries</h2>
 				<div class="content">
-					<p>You may need a library within your worker, for that the easiest way is to compile and export your script into a dedicated file. To use the worker file simply place the path as parameter.</p>
+					<p>You may need a library within your worker, for that the easiest way is to compile and export your worker script into a dedicated file. To use the worker file simply place the path as parameter:</p>
 					<div class="tabs">
 						<ul>
 							<li data-tab="main">main.js</li>
 							<li data-tab="worker">worker.js</li>
 						</ul>
-						<pre class=" current full javascript" data-tab="main" data-script="compiled-workers">
+						<pre class="current full javascript" data-file="main" data-script="compiled-workers">
 							import Threadizer from "@threadizer/core";
 
 							const thread = await new Threadizer("path/to/worker.js");
 						</pre>
-						<a class="run-code"></a>
-						<pre class="full javascript" data-tab="worker">
+						<a class="run-code console"></a>
+						<pre class="full javascript" data-file="worker">
 							import * as THREE from "three";
 
 							console.log(THREE);
 						</pre>
 					</div>
+					<p>You also can use <span class="hljs-inline">importScripts(...)</span> inside the worker to load externals or vendors scripts:</p>
+					<div>
+						<pre class="full javascript" data-script="compiled-workers">
+							import Threadizer from "@threadizer/core";
+
+							const thread = await new Threadizer(()=>{
+
+								importScripts("path/to/three.min.js");
+
+								console.log(THREE);
+
+							});
+						</pre>
+						<a class="run-code console"></a>
+					</div>
+				</div>
+			</section>
+			<section>
+				<h2>Performance</h2>
+				<div class="content">
+					<p>Running scripts within workers is the best way to avoid freezing the main-thread. Here is an example of a high CPU usage stress-test script, it will launch a loop of <span class="hljs-inline">1e4</span> iterations to sort an array.</p>
+					<p class="warning">Running the main-thread test will cause the browser to freeze the current tab during around 6 seconds (with an Intel i9). You can check how much time the main-thread got freezed in the devtools console.</p>
+					<div class="tabs">
+						<ul>
+							<li data-tab="worker">in worker</li>
+							<li data-tab="main-thread">on main-thread</li>
+						</ul>
+						<div data-file="worker">
+							<pre class="current full javascript" data-script="performance-worker">
+								import Threadizer from "@threadizer/core";
+
+								const thread = await new Threadizer(()=>{
+
+									console.log("begin performance-worker");
+									console.time("performance-worker");
+
+									const array = new Array();
+
+									for( let index = 0; index < 1e4; index++ ){
+
+										array[index] = Math.random();
+
+										array.sort();
+
+									}
+
+									console.timeEnd("performance-worker");
+
+								});
+							</pre>
+							<a class="run-code console"></a>
+						</div>
+						<div data-file="main-thread">
+							<pre class="full javascript" data-script="performance-main-thread">
+								console.time("performance-worker");
+
+								const array = new Array();
+
+								for( let index = 0; index < 1e4; index++ ){
+
+									array[index] = Math.random();
+
+									array.sort();
+
+								}
+
+								console.timeEnd("performance-worker");
+							</pre>
+							<a class="run-code"></a>
+						</div>
+					</div>
 				</div>
 			</section>
 		</main>
+		<footer>
+			<img src="/images/logo.png" alt="Threadizer logo representing a colorfull lightning."/>
+			<p>Copyright (c) 2021 Threadizer — <a href="https://github.com/threadizer/core/blob/main/LICENSE" target="_blank" rel="noopener">Licensed</a></p>
+		</footer>
 	</body>
 </html>

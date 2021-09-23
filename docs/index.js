@@ -1,15 +1,36 @@
-// import Threadizer from "@/index.js";
 import Highlighter from "highlight.js";
 
 const EXAMPLES = {
 	"header": require("†/assets/examples/header.js").default,
 	"quick-start": require("†/assets/examples/quick-start.js").default,
 	"compiled-workers": require("†/assets/examples/compiled-workers.js").default,
+	"performance-worker": require("†/assets/examples/performance-worker.js").default,
+	"performance-main-thread": require("†/assets/examples/performance-main-thread.js").default
 };
 
 import "†/assets/styles/main.scss";
 
 document.addEventListener("DOMContentLoaded", async ()=>{
+
+	let previousNow = 0;
+
+	function checkLoop( now ){
+
+		requestAnimationFrame(checkLoop);
+
+		let delta = now - previousNow;
+
+		if( delta > 1000 && document.hasFocus() ){
+
+			console.log(`%cThe main-thread freezed during more than 1 second: ${ (delta / 1000).toFixed(1) }s`, "padding: 5px 15px; color: #D49F41; background-color: #322B08; border-radius: 5px;");
+
+		}
+
+		previousNow = now;
+
+	};
+
+	requestAnimationFrame(checkLoop);
 
 	EXAMPLES.header(document.querySelector("header"));
 
@@ -31,17 +52,72 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 		if( script ){
 
-			pre.parentElement.querySelector(".run-code").addEventListener("click", script);
+			const button = pre.parentElement.querySelector(".run-code");
+
+			button.addEventListener("click", ()=>{
+
+				if( !button.classList.contains("running") ){
+
+					button.classList.add("pressed", "running");
+
+					requestAnimationFrame(async ()=>{
+
+						button.runningScript = await script(()=>{
+
+							button.classList.remove("running");
+
+							button.runningScript?.element?.remove();
+
+						});
+
+						if( button.runningScript ){
+
+							if( button.runningScript.element ){
+
+								button.runningScript.element.classList.add("output");
+
+								pre.parentElement.appendChild(button.runningScript.element);
+
+							}
+
+						}
+
+						requestAnimationFrame(() => button.classList.remove("pressed"));
+
+					});
+
+				}
+				else {
+
+					button.classList.remove("running");
+
+					button.runningScript?.destroy();
+
+					button.runningScript?.element?.remove();
+
+				}
+
+			});
 
 		}
 
 	});
 
+	await document.fonts.load("10px Fira Code");
+
 	Array.from(document.querySelectorAll(".tabs")).forEach(( container )=>{
 
 		const tabs = Array.from(container.querySelectorAll("ul > li"));
 
-		const files = Array.from(container.querySelectorAll("pre"));
+		const files = Array.from(container.querySelectorAll("[data-file]"));
+
+		const maxHeight = files.map(file => file.getBoundingClientRect().height).sort()[0];
+
+		for( let file of files ){
+
+			file.style.height = `${ maxHeight }px`;
+
+		}
 
 		for( let tab of tabs ){
 
@@ -55,7 +131,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 				files.forEach(( file )=>{
 
-					file.style.display = file.dataset.tab === tab.dataset.tab ? "" : "none";
+					file.style.display = file.dataset.file === tab.dataset.tab ? "" : "none";
 
 				});
 
@@ -63,24 +139,10 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 		}
 
-		tabs[0].dispatchEvent(new Event("click"));
+		const current = Math.max(0, files.findIndex(tab => tab.classList.contains("current")));
+
+		tabs[current].dispatchEvent(new Event("click"));
 
 	});
-
-	// const canvas = document.createElement("canvas");
-
-	// document.body.appendChild(canvas);
-
-	// const offscreenCanvas = canvas.transferControlToOffscreen();
-
-	// const thread = await new Threadizer(window.location.href + "worker.js");
-
-	// thread.on("rendered", ()=>{
-
-	// 	console.log("MAIN THREAD - Canvas has been rendered");
-
-	// });
-
-	// thread.transfer("canvas", offscreenCanvas, [offscreenCanvas]);
 
 }, { once: true });

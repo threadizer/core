@@ -12,7 +12,7 @@ export default async ( container )=>{
 	const thread = await new Threadizer(()=>{
 
 		// Import ThreeJS WebGL library
-		importScripts(location.origin + "/three.min.js");
+		importScripts(location.origin + "/vendors/three.min.js");
 
 		const duration = 1000;
 		const delay = 1000;
@@ -35,7 +35,7 @@ export default async ( container )=>{
 
 		function generatePlane( colors ){
 
-			const width = 0.3;
+			const width = 0.25;
 			const height = 0.5;
 			const skew = 0.25;
 
@@ -111,10 +111,18 @@ export default async ( container )=>{
 				new THREE.Color(0xA799EB),
 				new THREE.Color(0xFB7FAC),
 				new THREE.Color(0xFA929E)
+			]);
+
+			moving = generatePlane([
+				new THREE.Color(0x90A7EF),
+				new THREE.Color(0xA799EB),
+				new THREE.Color(0xFB7FAC),
+				new THREE.Color(0xFA929E)
 			]); 
 
 			group.add(top);
 			group.add(middle);
+			group.add(moving);
 			group.add(bottom);
 
 			setInterval(()=>{
@@ -124,7 +132,7 @@ export default async ( container )=>{
 				animationPositionStart = random ? top.position.clone() : bottom.position.clone();
 				animationPositionEnd = random ? bottom.position.clone() : top.position.clone();
 
-				middle.position.copy(animationPositionStart);
+				moving.position.copy(animationPositionStart);
 
 				animationStart = performance.now();
 
@@ -142,17 +150,17 @@ export default async ( container )=>{
 
 					const easeProgress = progress * (2 - progress);
 
-					top.position.set(easeProgress * -0.1, easeProgress * 0.3, 0.5);
-					bottom.position.set(easeProgress * 0.1, easeProgress * -0.3, -0.5);
+					top.position.set(easeProgress * -0.05, easeProgress * 0.3, 0.2);
+					bottom.position.set(easeProgress * 0.05, easeProgress * -0.3, -0.2);
 
 					const animationProgress = Math.min(1, (now - animationStart) / duration);
 					const animationEaseProgress = animationProgress < 0.5 ? (2 * animationProgress * animationProgress) : (-1 + (4 - 2 * animationProgress) * animationProgress);
 
 					const animationDelta = animationPositionEnd.clone().sub(animationPositionStart).multiplyScalar(animationEaseProgress);
 
-					middle.position.copy(animationPositionStart).add(animationDelta);
+					moving.position.copy(animationPositionStart).add(animationDelta);
 
-					middle.material.opacity = 1 - Math.abs(animationProgress * 2 - 1);
+					moving.material.opacity = 1 - Math.abs(animationProgress * 2 - 1);
 
 				}
 
@@ -192,7 +200,7 @@ export default async ( container )=>{
 			renderer.setSize(size.width, size.height, false);
 			renderer.setPixelRatio(size.pixelRatio);
 
-			const frustum = 2.5;
+			const frustum = 3;
 			const aspect = size.width / size.height;
 
 			camera.left = frustum * aspect / - 2;

@@ -144,6 +144,8 @@ export default class Threadizer extends EventManager {
 
 		this.worker?.terminate();
 
+		this.off();
+
 		return this;
 
 	}

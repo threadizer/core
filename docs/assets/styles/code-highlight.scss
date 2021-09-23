@@ -15,6 +15,7 @@ $background-color-light: #3E3E3E;
 }
 
 pre {
+	box-sizing: border-box;
 	border-radius: 1rem;
 	tab-size: 3rem;
 	padding: 4rem;
@@ -24,35 +25,77 @@ pre {
 	&:not(.full) {
 		display: inline-block;
 	}
+}
 
-	&[data-script] {
+.run-code {
+	z-index: 999;
+	position: absolute;
+	right: 1.5rem;
+	bottom: 1.5rem;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 2.5rem;
+	background-color: rgba($text-color, 0.5);
+	cursor: pointer;
 
-		& + .run-code {
-			z-index: 999;
-			position: absolute;
-			right: 1.5rem;
-			bottom: 1.5rem;
-			width: 3rem;
-			height: 3rem;
-			border-radius: 2.5rem;
-			background-color: rgba($text-color, 0.5);
-			cursor: pointer;
+	&:hover {
+		background-color: rgba($text-color, 0.8);
+	}
 
-			&:hover {
-				background-color: rgba($text-color, 0.8);
-			}
+	&::after {
+		content: "►";
+		display: block;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		display: block;
+		font-size: 1.8rem;
+		color: $background-color;
+		transform: translate(-36%, -50%);
+	}
 
-			&::before {
-				content: "►";
-				position: absolute;
-				left: 50%;
-				top: 50%;
-				display: block;
-				font-size: 1.8rem;
-				color: $background-color;
-				transform: translate(-36%, -50%);
-			}
+	&.console::before {
+		content: "Output in devtools console";
+		display: block;
+		position: absolute;
+		top: 50%;
+		right: 100%;
+		margin-right: 1rem;
+		font-size: 1.2rem;
+		letter-spacing: -0.08rem;
+		font-family: "Fira Code Light";
+		color: $text-color;
+		white-space: nowrap;
+		transform: translateY(-50%);
+		opacity: 0;
+		transition: opacity 0.5s ease-out 2s;
+	}
+
+	&.console.pressed::before {
+		transition: none;
+		opacity: 1;
+	}
+
+	@keyframes rotate {
+		0% {
+			transform: translate(-50%, -50%) rotateZ(0deg);
 		}
+		100% {
+			transform: translate(-50%, -50%) rotateZ(360deg);
+		}
+	}
+
+	&.running::after {
+		content: "";
+		display: block;
+		box-sizing: border-box;
+		width: 2rem;
+		height: 2rem;
+		border: 2px solid $background-color;
+		border-radius: 1rem;
+		border-bottom-color: transparent;
+		transform: translate(-50%, -50%);
+		animation: rotate 1s linear infinite;
 	}
 }
 
@@ -81,8 +124,34 @@ pre {
 		}
 	}
 
+	[data-file] {
+		max-height: 350px;
+
+		pre {
+			max-height: 350px;
+		}
+	}
+
 	pre {
 		margin-top: 0;
+	}
+}
+
+.visual-code {
+
+	pre {
+		margin-top: 0;
+		width: 100%;
+		max-height: 500px;
+	}
+
+	.output {
+		position: absolute;
+		left: 0;
+		top: 0;
+		border-radius: 1rem;
+		width: 100%;
+		height: 100%;
 	}
 }
 

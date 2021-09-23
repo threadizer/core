@@ -1,13 +1,31 @@
 import Threadizer from "@/index.js";
 
-export default async ()=>{
+export default async ( unmount )=>{
 
-	await new Threadizer(()=>{
+	const thread = await new Threadizer(()=>{
 
-		importScripts(location.origin + "/three.min.js");
+		importScripts(location.origin + "/vendors/three.min.js");
 
 		console.log(THREE);
 
+		thread.transfer("complete");
+
 	});
+
+	thread.on("complete", ()=>{
+
+		thread.destroy();
+
+		unmount();
+
+	});
+
+	return {
+		destroy: ()=>{
+
+			thread.destroy();
+
+		}
+	};
 
 };

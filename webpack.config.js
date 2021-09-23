@@ -38,8 +38,7 @@ module.exports = ( env, options )=>{
 	};
 
 	const entries = {
-		index: "./source/index.js",
-		// worker: "./docs/worker.js"
+		index: "./source/index.js"
 	};
 
 	const plugins = [
@@ -57,7 +56,8 @@ module.exports = ( env, options )=>{
 		}),
 		new WebpackCopyPlugin({
 			patterns: [
-				{ from: "docs/assets/vendors", to: "./" }
+				{ from: "docs/assets/images", to: "./images" },
+				{ from: "docs/assets/vendors", to: "./vendors" }
 			]
 		}),
 		new WebpackESLintPlugin()
