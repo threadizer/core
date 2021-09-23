@@ -38,7 +38,7 @@ export default class Threadizer extends EventManager {
 
 			if( application instanceof Function ){
 
-				application = `(${ application.toString() })()`;
+				application = `(${ application.toString() })(self)`;
 
 			}
 			else if( typeof application === "string" ){
@@ -62,7 +62,7 @@ export default class Threadizer extends EventManager {
 
 			if( application instanceof Function ){
 
-				application = `(${ application.toString() })()`;
+				application = `(${ application.toString() })(thread)`;
 
 			}
 			else if( typeof application === "string" ){
@@ -143,6 +143,8 @@ export default class Threadizer extends EventManager {
 	destroy(){
 
 		this.worker?.terminate();
+
+		this.off();
 
 		return this;
 

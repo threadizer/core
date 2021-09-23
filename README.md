@@ -78,3 +78,8 @@ Dispatch event to the class that match one or all parameters.
 ## Application (worker or main thread)
 
 You can access the global variable `thread` within your application code which also contains the methods (reversed) `on`, `off`, `dispatch` and `transfer`.
+In your application, `self` refer to the current context (`worker` or `window`).
+
+### Property
+
+ - `isWorker`: `true` if a worker, `false` if running on main thread.
