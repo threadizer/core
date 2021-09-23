@@ -6,7 +6,7 @@ export default async ( unmount )=>{
 
 		self.on("setup", ({ detail: baseURL })=>{
 
-			importScripts(baseURL + "/vendors/three.min.js");
+			importScripts(baseURL + "/three.min.js");
 
 			console.log(THREE);
 
