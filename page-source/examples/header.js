@@ -38,14 +38,12 @@ export default async ( container )=>{
 		// Listen to the "canvas" event from main thread
 		thread.on("setup", ({ detail })=>{
 
-			console.log("setup", self, thread);
-
 			const { offscreenCanvas, baseURL } = detail;
 
 			// Import ThreeJS WebGL library if inside a worker
 			if( thread.isWorker ){
 
-				importScripts(baseURL + "/three.min.js");
+				importScripts(baseURL + "three.min.js");
 
 			}
 

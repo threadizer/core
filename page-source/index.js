@@ -1,11 +1,11 @@
 import Highlighter from "highlight.js";
 
 const EXAMPLES = {
-	"header": require("†/assets/examples/header.js").default,
-	"quick-start": require("†/assets/examples/quick-start.js").default,
-	"compiled-workers": require("†/assets/examples/compiled-workers.js").default,
-	"performance-worker": require("†/assets/examples/performance-worker.js").default,
-	"performance-main-thread": require("†/assets/examples/performance-main-thread.js").default
+	"header": require("†/examples/header.js").default,
+	"quick-start": require("†/examples/quick-start.js").default,
+	"compiled-workers": require("†/examples/compiled-workers.js").default,
+	"performance-worker": require("†/examples/performance-worker.js").default,
+	"performance-main-thread": require("†/examples/performance-main-thread.js").default
 };
 
 import "†/assets/styles/main.scss";

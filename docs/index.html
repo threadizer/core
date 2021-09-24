@@ -14,7 +14,7 @@
 				<h1>Threadizer</h1>
 			</header>
 			<pre class="full javascript">
-				import Threadizer from "@/index.js";
+				import Threadizer from "@threadizer/core";
 
 				export default async ( container )=>{
 
@@ -61,7 +61,7 @@
 							// Import ThreeJS WebGL library if inside a worker
 							if( thread.isWorker ){
 
-								importScripts(baseURL + "/vendors/three.min.js");
+								importScripts(baseURL + "three.min.js");
 
 							}
 
@@ -278,16 +278,16 @@
 			<section>
 				<h2>Install</h2>
 				<div class="content">
-					<p>The package is published on <a href="https://www.npmjs.com/package/@threadizer/core" target="_blank" rel="noopener">npm</a>.</p>
+					<p>The package is published on <a href="https://www.npmjs.com/package/@threadizer/core" target="_blank" rel="noopener">npm</a> and sources are available on <a href="https://github.com/threadizer" target="_blank" rel="noopener">github</a>.</p>
 					<pre class="bash">npm install @threadizer/core</pre>
 				</div>
 			</section>
 			<section>
 				<h2>Quick Start</h2>
 				<div class="content">
-					<p>In this example, the function is ran within the worker then the main thread send it a message named "custom-event" containing some data. You can send any <span class="hljs-inline">Object</span> (it must works with <span class="hljs-inline">JSON.stringify(...)</span>) or any instance of <span class="hljs-inline">ArrayBuffer</span>, <span class="hljs-inline">MessagePort</span>, <span class="hljs-inline">ImageBitmap</span> or <span class="hljs-inline">OffscreenCanvas</span>.</p>
+					<p>In this example, the function is ran within the worker thread then the main thread send it a message named "custom-event" containing some data. You can send any <span class="hljs-inline">Object</span> (it must works with <span class="hljs-inline">JSON.stringify(...)</span>) or any instance of <span class="hljs-inline">ArrayBuffer</span>, <span class="hljs-inline">MessagePort</span>, <span class="hljs-inline">ImageBitmap</span> or <span class="hljs-inline">OffscreenCanvas</span>.</p>
 					<pre class="full javascript" data-script="quick-start">
-						import Threadizer from "@/index.js";
+						import Threadizer from "@threadizer/core";
 
 						const thread = await new Threadizer(()=>{
 
@@ -309,7 +309,7 @@
 			<section>
 				<h2>Importing external libraries</h2>
 				<div class="content">
-					<p>You may need a library within your worker, for that the easiest way is to compile and export your worker script into a dedicated file. To use the worker file simply place the path as parameter:</p>
+					<p>You may need libraries within your worker, for that the easiest way is to compile and export your worker script into a dedicated file. To use the worker file simply place the path as first parameter:</p>
 					<div class="tabs">
 						<ul>
 							<li data-tab="main">main.js</li>
