@@ -4,27 +4,23 @@ export default async ( unmount )=>{
 
 	const thread = await new Threadizer(()=>{
 
-		self.on("setup", ({ detail: baseURL })=>{
+		self.on("setup", ({ detail: baseURL, complete })=>{
 
-			importScripts(baseURL + "/three.min.js");
+			importScripts(baseURL + "three.min.js");
 
 			console.log(THREE);
 
-			self.transfer("complete");
+			complete();
 
 		});
 
 	});
 
-	thread.transfer("setup", window.location.href);
+	await thread.transfer("setup", window.location.href);
 
-	thread.on("complete", ()=>{
+	thread.destroy();
 
-		thread.destroy();
-
-		unmount();
-
-	});
+	unmount();
 
 	return {
 		destroy: ()=>{

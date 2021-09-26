@@ -8,7 +8,7 @@ export default async ( unmount )=>{
 
 			console.log(self, event.detail);
 
-			self.transfer("complete");
+			event.complete();
 
 		});
 
@@ -16,15 +16,11 @@ export default async ( unmount )=>{
 
 	const buffer = new ArrayBuffer(1000);
 
-	thread.on("complete", ()=>{
+	await thread.transfer("custom-event", buffer, [buffer]);
 
-		thread.destroy();
+	thread.destroy();
 
-		unmount();
-
-	});
-
-	thread.transfer("custom-event", buffer, [buffer]);
+	unmount();
 
 	return {
 		destroy: ()=>{

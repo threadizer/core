@@ -30,7 +30,7 @@ module.exports = ( env, options )=>{
 		historyApiFallback: true,
 		host: HOST,
 		hot: true,
-		https: false,
+		https: true,
 		open: true,
 		static: {
 			directory: BUILD_PATH,
