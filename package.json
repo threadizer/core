@@ -1,6 +1,6 @@
 {
   "name": "@threadizer/core",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "description": "Execute code within a worker",
   "main": "build/index.js",
   "directories": {

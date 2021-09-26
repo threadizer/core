@@ -3,9 +3,16 @@ export default class EventManager {
 	#events = new Array();
 	constructor( scope ){
 
-		this.#scope = scope ?? this;
+		this.scope = scope;
 
 		return this;
+
+	}
+	set scope( scope ){
+
+		this.#scope = scope || this;
+
+		this.off();
 
 	}
 	on( type, action, options = false ){
@@ -14,7 +21,6 @@ export default class EventManager {
 
 			const event = {
 				type: type,
-				native: this.#scope.addEventListener instanceof Function && `on${ type.toLowerCase() }` in self,
 				action: ( event )=>{
 
 					action.call(this.#scope, event);
@@ -29,12 +35,6 @@ export default class EventManager {
 				originalAction: action,
 				options: options
 			};
-
-			if( event.native ){
-
-				this.#scope.addEventListener(event.type, event.action, event.options);
-
-			}
 
 			this.#events.push(event);
 
@@ -67,24 +67,17 @@ export default class EventManager {
 		return this;
 
 	}
-	dispatch( type, options = null ){
+	dispatch( type, data, callback ){
 
-		const customEvent = new CustomEvent(type, options);
+		const customEvent = new CustomEvent(type, { detail: data });
 
-		if( `on${ type.toLowerCase() }` in this.#scope ){
+		customEvent.complete = callback;
 
-			this.#scope.dispatchEvent(customEvent);
+		for( let event of this.#events ){
 
-		}
-		else {
+			if( event.type === type ){
 
-			for( let event of this.#events ){
-
-				if( event.type === type ){
-
-					event.action(customEvent);
-
-				}
+				event.action(customEvent);
 
 			}
 

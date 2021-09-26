@@ -1,6 +1,6 @@
 # Threadizer
 
-Execute code within a worker (or main thread as fallback).
+Run code within a worker (or main-thread as fallback).
 
 ## Install
 The project is [published on npm](https://www.npmjs.com/package/@threadizer/core)
@@ -49,12 +49,11 @@ That method is called by the constructor if `application` is defined or you can 
 #### async run()
 Run the application within a worker or not depending on previously compiled method call.
 
-#### transfer( `type`, `data`, `transferable` )
+#### transfer( `type`, `data` )
 Send data as event from main thread to application
 
  - `type`: *(String)* The name of the event to transfer to the worker.
  - `data`: *(Any)* **Optional** Data or content to transfer to the worker.
- - `transferable`: *(Array)* **Optional** List of [transferable](https://developer.mozilla.org/en-US/docs/Web/API/Transferable) objects if needed (Not needed for anything working with `JSON.stringify()`)
 
 #### destroy()
 Terminate the application.
@@ -71,10 +70,12 @@ Remove event listener from the class that match one or all parameters.
  - `action`: *(Function)* **Optional** The action registered to the event.
  - `options`: *(Boolean|Object)* **Optional** The options registered to the event.
 
-#### dispatch( `type`, `options` )
-Dispatch event to the class that match one or all parameters.
+#### dispatch( `type`, `options`, `callback` )
+Dispatch event that match one or all parameters.
+Return a `Promise`.
  - `type`: *(String)* The name of the event to remove.
  - `options`: *(Any)* **Optional** The options passed to the creation of the [`CustomEvent`](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent)
+ - `callback`: *(Function)* **Optional** A callback triggered inside the event action by calling `event.complete()`.
 
 ## Application (worker or main thread)
 

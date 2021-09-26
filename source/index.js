@@ -1,5 +1,7 @@
 import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
+import traverse from "@/components/traverse.js";
+import uuid from "@/components/uuid.js";
 
 export default class Threadizer extends EventManager {
 	#id = null;
@@ -9,7 +11,7 @@ export default class Threadizer extends EventManager {
 
 		super();
 
-		this.#id = `__threadizer_${ Math.random().toString(36).substring(2, 15) }`;
+		this.#id = `__threadizer_${ uuid() }`;
 
 		return new Promise(async ( resolve )=>{
 
@@ -34,6 +36,11 @@ export default class Threadizer extends EventManager {
 
 		this.#insideMainThread = !!insideMainThread;
 
+		const tools = `{
+			uuid: ${ uuid.toString() },
+			traverse: ${ traverse.toString() }
+		}`;
+
 		if( !insideMainThread ){
 
 			if( application instanceof Function ){
@@ -49,7 +56,7 @@ export default class Threadizer extends EventManager {
 
 			this.#application = `(function(){
 
-				(${ WorkerManager })(self, ${ extension }).then(function(){
+				(${ WorkerManager })(self, ${ tools }, ${ extension }).then(function(){
 
 					${ application }
 
@@ -71,13 +78,19 @@ export default class Threadizer extends EventManager {
 
 			}
 
-			this.#application = `window.${ this.#id } = function( thread ){
+			this.#application = `window["${ this.#id }"] = function( thread ){
 
-				(${ extension })?.(thread);
+				var extension = ${ extension };
+
+				if( extension instanceof Function ){
+
+					extension(thread);
+
+				}
 
 				${ application }
 
-				thread.worker = window.${ this.#id };
+				thread.worker = window["${ this.#id }"];
 
 			};`;
 
@@ -102,9 +115,13 @@ export default class Threadizer extends EventManager {
 
 				worker.addEventListener("message", ( event )=>{
 
-					const { type, data } = event.data;
+					const { type, data, id } = event.data;
 
-					this.dispatch(type, { detail: data });
+					this.dispatch(type, data, ( done = true )=>{
+
+						this.worker.postMessage({ type: "transfer-answer", data: { done, id } });
+
+					});
 
 				});
 
@@ -124,20 +141,54 @@ export default class Threadizer extends EventManager {
 		return this;
 
 	}
-	transfer( type, data, transferable ){
+	transfer( type, data ){
 
-		if( this.worker instanceof Worker ){
+		return new Promise(( resolve, reject )=>{
 
-			this.worker.postMessage({ type, data }, transferable);
+			const id = uuid();
 
-		}
-		else {
+			const hook = ({ detail: data })=>{
 
-			this.dispatch(type, { detail: data });
+				if( data.id === id ){
 
-		}
+					this.off("transfer-answer", hook);
 
-		return this;
+					data.done ? resolve() : reject();
+
+				}
+
+			};
+
+			this.on("transfer-answer", hook);
+
+			if( this.isWorker ){
+
+				const transferable = new Array();
+
+				traverse(data, ( value )=>{
+
+					if( value instanceof window.ArrayBuffer || value instanceof window.MessagePort || value instanceof window.ImageBitmap || value instanceof window.OffscreenCanvas ){
+
+						transferable.push(value);
+
+					}
+
+				});
+
+				this.worker.postMessage({ type, data, id }, transferable);
+
+			}
+			else {
+
+				this.dispatch(type, data, ( done = true )=>{
+
+					this.dispatch("transfer-answer", { done, id });
+
+				});
+
+			}
+
+		});
 
 	}
 	destroy(){
@@ -147,29 +198,6 @@ export default class Threadizer extends EventManager {
 		this.off();
 
 		return this;
-
-	}
-	#generateWorker( application ){
-
-		return new Promise(( resolve )=>{
-
-			const blob = new Blob([application], { type: "text/javascript" });
-
-			const url = URL.createObjectURL(blob);
-
-			const worker = new Worker(url);
-
-			this.on("worker-ready", () => resolve(worker), { once: true });
-
-			worker.addEventListener("message", ( event )=>{
-
-				const { type, data } = event.data;
-
-				this.dispatch(type, { detail: data });
-
-			});
-
-		});
 
 	}
 }

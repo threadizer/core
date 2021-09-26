@@ -6,43 +6,32 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	document.body.appendChild(canvas);
 
-	const offscreenCanvas = canvas.transferControlToOffscreen();
+	const supports = canvas.transferControlToOffscreen instanceof Function;
 
-	const thread = await new Threadizer(window.location.href + "worker.js");
+	const offscreenCanvas = supports ? canvas.transferControlToOffscreen() : canvas;
 
-	// Same but forced in main thread
-	// const thread = await new Threadizer(window.location.href + "worker.js", undefined, true);
+	const thread = await new Threadizer(window.location.href + "worker.js", null, !supports);
 
-	// Same but inline
-	/*
-	const thread = await new Threadizer(()=>{
-
-		thread.on("canvas", ({ detail: canvas })=>{
-
-			const context = canvas.getContext("2d");
-
-			context.fillRect(0, 0, canvas.width, canvas.height);
-
-			Object.assign(context, {
-				fillStyle: "#FFF",
-				font: "13px sans-serif",
-				textAlign: "center",
-				textBaseline: "middle"
-			});
-
-			context.fillText("OffscreenCanvas painted within a subthread", canvas.width / 2, canvas.height / 2, canvas.width);
-
-		});
-
-	});
-	*/
-
-	thread.on("rendered", ()=>{
+	thread.on("rendered", ( event )=>{
 
 		console.log("MAIN THREAD - Canvas has been rendered");
 
+		setTimeout(event.complete, 2000);
+
 	});
 
-	thread.transfer("canvas", offscreenCanvas, [offscreenCanvas]);
+	await thread.transfer("canvas", offscreenCanvas);
+
+	requestAnimationFrame(async ()=>{
+
+		const img = new Image();
+
+		canvas.toBlob(( blob )=> img.src = URL.createObjectURL(blob));
+
+		document.body.appendChild(img);
+
+		console.log("End");
+
+	});
 
 }, { once: true });

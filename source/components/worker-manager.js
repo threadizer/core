@@ -1,6 +1,6 @@
-export default function( self, extension ){
+export default function( self, tools, extension ){
 
-	self.thread = self;
+	Object.assign(self, { thread: self }, tools);
 
 	return new Promise(async ( resolve )=>{
 
@@ -27,11 +27,11 @@ export default function( self, extension ){
 
 				for( let index = events.length - 1; index >= 0; index-- ){
 
-					const event = this.events[index];
+					const event = events[index];
 
 					if( (event.type === type || type === undefined) && (event.action === action || action === undefined) ){
 
-						self.removeEvent(type, action);
+						self.removeEventListener(type, action);
 
 						events.splice(index, 1);
 
@@ -40,23 +40,63 @@ export default function( self, extension ){
 				}
 
 			},
-			dispatch( type, options ){
+			dispatch( type, data, id ){
 
-				self.dispatchEvent(new CustomEvent(type, options));
+				const event = new CustomEvent(type, { detail: data });
+
+				event.complete = ( done = true )=>{
+
+					self.postMessage({ type: "transfer-answer", data: { done, id } });
+
+				};
+
+				self.dispatchEvent(event);
 
 			},
-			transfer( type, data, transferable ){
+			transfer( type, data ){
 
-				self.postMessage({ type, data }, transferable);
+				return new Promise(( resolve, reject )=>{
+
+					const id = uuid();
+
+					const transferable = new Array();
+
+					traverse(data, ( value )=>{
+
+						if( value instanceof self.ArrayBuffer || value instanceof self.MessagePort || value instanceof self.ImageBitmap || value instanceof self.OffscreenCanvas ){
+
+							transferable.push(value);
+
+						}
+
+					});
+
+					const hook = ({ detail: data })=>{
+
+						if( data.id === id ){
+
+							self.off("transfer-answer", hook);
+
+							data.done ? resolve() : reject();
+
+						}
+
+					};
+
+					self.on("transfer-answer", hook);
+
+					self.postMessage({ type, data, id }, transferable);
+
+				});
 
 			}
 		});
 
 		self.on("message", ( event )=>{
 
-			const { type, data } = event.data;
+			const { type, data, id } = event.data;
 
-			self.dispatch(type, { detail: data });
+			self.dispatch(type, data, id);
 
 		});
 
@@ -74,4 +114,4 @@ export default function( self, extension ){
 
 	});
 
-}
+};

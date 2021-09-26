@@ -1,4 +1,6 @@
-thread.on("canvas", ({ detail: canvas })=>{
+console.log("App started");
+
+thread.on("canvas", async ({ detail: canvas, complete })=>{
 
 	const text = thread.isWorker ? "OffscreenCanvas painted within a worker" : "OffscreenCanvas painted within main thread";
 
@@ -15,6 +17,8 @@ thread.on("canvas", ({ detail: canvas })=>{
 
 	context.fillText(text, canvas.width / 2, canvas.height / 2, canvas.width);
 
-	thread.transfer("rendered");
+	await thread.transfer("rendered");
+
+	complete();
 
 });
