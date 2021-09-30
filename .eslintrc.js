@@ -27,7 +27,6 @@ module.exports = {
 		semi: [WARNING, ALWAYS],
 		quotes: [ERROR, "double"],
 		eqeqeq: [ERROR, "always"],
-		"one-var": [ERROR, "never"],
 		"eol-last": [WARNING, ALWAYS],
 		"no-unused-vars": WARNING,
 		"semi-spacing": [ERROR, {
