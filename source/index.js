@@ -191,6 +191,17 @@ export default class Threadizer extends EventManager {
 		});
 
 	}
+	async close( maxTimeout = 3000 ){
+
+		const closing = this.transfer("close");
+
+		const timeout = new Promise(resolve => setTimeout(resolve, maxTimeout));
+
+		await Promise.race(closing, timeout);
+
+		this.destroy();
+	
+	}
 	destroy(){
 
 		this.worker?.terminate();
