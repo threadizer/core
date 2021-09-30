@@ -58,6 +58,9 @@ Send data as event from main thread to application
 #### destroy()
 Terminate the application.
 
+#### static isTransferable( value )
+Return true if value is transferable between main-thread and worker.
+
 #### on( `type`, `action`, `options` )
 Add event listener to the class.
  - `type`: *(String)* The name of the event to listen.
@@ -79,7 +82,7 @@ Return a `Promise`.
 
 ## Application (worker or main thread)
 
-You can access the global variable `thread` within your application code which also contains the methods (reversed) `on`, `off`, `dispatch` and `transfer`.
+You can access the global variable `thread` within your application code which also contains the methods (reversed) `on()`, `off()`, `dispatch()` and `transfer()` and `static isTransferable()`.
 In your application, `self` refer to the current context (`worker` or `window`).
 
 ### Property

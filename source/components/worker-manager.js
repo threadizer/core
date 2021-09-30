@@ -63,9 +63,9 @@ export default function( self, tools, extension ){
 
 					traverse(data, ( value )=>{
 
-						if( value instanceof self.ArrayBuffer || value instanceof self.MessagePort || value instanceof self.ImageBitmap || value instanceof self.OffscreenCanvas ){
+						if( isTransferable(value) ){
 
-							transferable.push(value);
+							self.transferable.push(value);
 
 						}
 
@@ -88,6 +88,20 @@ export default function( self, tools, extension ){
 					self.postMessage({ type, data, id }, transferable);
 
 				});
+
+			},
+			isTransferable( value ){
+
+				try {
+
+					return value instanceof window.ArrayBuffer || value instanceof window.MessagePort || value instanceof window.ImageBitmap || value instanceof window.OffscreenCanvas;
+
+				}
+				catch( error ){
+
+					return false;
+
+				}
 
 			}
 		});

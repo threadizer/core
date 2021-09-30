@@ -167,7 +167,7 @@ export default class Threadizer extends EventManager {
 
 				traverse(data, ( value )=>{
 
-					if( value instanceof window.ArrayBuffer || value instanceof window.MessagePort || value instanceof window.ImageBitmap || value instanceof window.OffscreenCanvas ){
+					if( Threadizer.isTransferable(value) ){
 
 						transferable.push(value);
 
@@ -198,6 +198,20 @@ export default class Threadizer extends EventManager {
 		this.off();
 
 		return this;
+
+	}
+	static isTransferable( value ){
+
+		try {
+
+			return value instanceof window.ArrayBuffer || value instanceof window.MessagePort || value instanceof window.ImageBitmap || value instanceof window.OffscreenCanvas;
+
+		}
+		catch( error ){
+
+			return false;
+
+		}
 
 	}
 }
