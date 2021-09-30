@@ -38,6 +38,7 @@ module.exports = ( env, options )=>{
 	};
 
 	const entries = {
+		"index": "./source/index.js",
 		"page-source": "./page-source/index.js"
 	};
 
@@ -69,7 +70,7 @@ module.exports = ( env, options )=>{
 			meta: {
 				viewport: "width=device-width, initial-scale=1"
 			},
-			excludeChunks: ["index"/*, "worker"*/],
+			excludeChunks: ["index"],
 			minify: false,
 			xhtml: true
 		}),

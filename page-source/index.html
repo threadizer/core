@@ -325,6 +325,40 @@
 				</div>
 			</section>
 			<section>
+				<h2>Deep workers</h2>
+				<div class="content">
+					<p>A worker can itself create sub-workers offering infinite possibility of optimisations.</p>
+					<p class="warning">If a thread is destroyed, all its child threads are destroyed too. Also, remember that if a parent thread is frozen by a long process, communications among its child threads would be delayed.</p>
+					<div class="tabs">
+						<ul>
+							<li data-tab="main">main.js</li>
+							<li data-tab="worker">worker.js</li>
+						</ul>
+						<pre class="full javascript" data-file="main" data-script="subworkers">
+							import Threadizer from "@threadizer/core";
+
+							const thread = await new Threadizer("path/to/worker.js");
+						</pre>
+						<a class="run-code console"></a>
+						<pre class="current full javascript" data-file="worker">
+							const Threadizer = self.Threadizer.default;
+
+							const subthreadA = await new Threadizer(()=>{
+
+								console.log("subthread A ready");
+
+							});
+
+							const subthreadB = await new Threadizer(()=>{
+
+								console.log("subthread B ready");
+
+							});
+						</pre>
+					</div>
+				</div>
+			</section>
+			<section>
 				<h2>Performance</h2>
 				<div class="content">
 					<p>Running scripts within workers is the best way to avoid freezing the main-thread. Here is an example of a high CPU usage stress-test script, it will launch a loop of <span class="hljs-inline">1e4</span> iterations to sort an array.</p>

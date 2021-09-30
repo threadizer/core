@@ -5,7 +5,8 @@ const EXAMPLES = {
 	"quick-start": require("†/examples/quick-start.js").default,
 	"compiled-workers": require("†/examples/compiled-workers.js").default,
 	"performance-worker": require("†/examples/performance-worker.js").default,
-	"performance-main-thread": require("†/examples/performance-main-thread.js").default
+	"performance-main-thread": require("†/examples/performance-main-thread.js").default,
+	"subworkers": require("†/examples/subworkers.js").default
 };
 
 import "†/assets/styles/main.scss";
@@ -111,7 +112,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 		const files = Array.from(container.querySelectorAll("[data-file]"));
 
-		const maxHeight = files.map(file => file.getBoundingClientRect().height).sort()[0];
+		const maxHeight = files.map(file => file.getBoundingClientRect().height).sort(( a, b )=> a > b ? -1 : 1)[0];
 
 		for( let file of files ){
 
