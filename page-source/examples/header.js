@@ -21,7 +21,7 @@ export default async ( container )=>{
 
 		let renderer, camera, group, scene, top, middle, moving, bottom, width, height, animationStart, animationPositionStart, animationPositionEnd, movePositionTarget, moveRotationTarget;
 
-		// Listen to the "canvas" event from main thread
+		// Listen to the "setup" event from main thread
 		thread.on("setup", ({ detail })=>{
 
 			const { offscreenCanvas, baseURL } = detail;
@@ -182,7 +182,7 @@ export default async ( container )=>{
 
 		});
 
-		// Listen to the "mousemove" event from main thread
+		// Listen to the "move" event from main thread
 		thread.on("move", ({ detail: move })=>{
 
 			const x = -((move.clientX / width) * 2 - 1);
@@ -193,7 +193,7 @@ export default async ( container )=>{
 
 		});
 
-		// Listen to the "resize" event from main thread
+		// Listen to the "setSize" event from main thread
 		thread.on("setSize", ({ detail: size })=>{
 
 			width = size.width;
@@ -235,7 +235,7 @@ export default async ( container )=>{
 
 	});
 
-	// Trigger resize event transfer to set initial canvas size
+	// Trigger resize event once on page ready to trigger transfer to set initial canvas size
 	window.dispatchEvent(new Event("resize"));
 
 };
