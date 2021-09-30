@@ -32,6 +32,7 @@ pre {
 	position: absolute;
 	right: 1.5rem;
 	bottom: 1.5rem;
+	border: 1px solid rgba(#FFF, 0.15);
 	width: 3rem;
 	height: 3rem;
 	border-radius: 2.5rem;
@@ -52,6 +53,7 @@ pre {
 		font-size: 1.8rem;
 		color: $background-color;
 		transform: translate(-36%, -50%);
+		text-shadow: 0 0 1px rgba(#FFF, 0.8);
 	}
 
 	&.console::before {

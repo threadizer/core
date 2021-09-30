@@ -56,6 +56,7 @@ html {
 				position: absolute;
 				right: 1.5rem;
 				bottom: 1.5rem;
+				border: 1px solid rgba(#FFF, 0.2);
 				width: 3rem;
 				height: 3rem;
 				border-radius: 2.5rem;
@@ -74,16 +75,18 @@ html {
 					display: block;
 					font-size: 1.5rem;
 					color: $blue;
+					font-family: "Fira Code Bolder";
+					text-shadow: 0 0 1px #FFF;
 				}
 
 				&::before {
 					content: "<";
-					transform: translate(-100%, -50%);
+					transform: translate(-105%, -50%);
 				}
 
 				&::after {
 					content: ">";
-					transform: translate(0%, -50%);
+					transform: translate(5%, -50%);
 				}
 			}
 
