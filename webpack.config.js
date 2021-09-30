@@ -137,7 +137,5 @@ module.exports = ( env, options )=>{
 		},
 		plugins
 	};
+
 };
-
-
-
