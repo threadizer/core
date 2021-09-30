@@ -16,261 +16,243 @@
 			<pre class="full javascript">
 				import Threadizer from "@threadizer/core";
 
-				export default async ( container )=>{
+				const canvas = document.createElement("canvas");
 
-					const canvas = document.createElement("canvas");
+				const supports = canvas.transferControlToOffscreen instanceof Function;
 
-					const supports = canvas.transferControlToOffscreen instanceof Function;
+				container.appendChild(canvas);
 
-					container.appendChild(canvas);
+				// Convert canvas into offscreen canvas if supported.
+				const offscreenCanvas = supports ? canvas.transferControlToOffscreen() : canvas;
 
-					// Convert canvas into offscreen canvas if supported.
-					const offscreenCanvas = supports ? canvas.transferControlToOffscreen() : canvas;
+				// Call a thread if "supports" is true, run on main-thread if not (see 3rd parameter) at the end.
+				const thread = await new Threadizer(( thread )=>{
 
-					// Call a thread if "supports" is true, run on main-thread if not (see 3rd parameter) at the end.
-					const thread = await new Threadizer(( thread )=>{
+					const duration = 1000;
+					const delay = 1000;
+					const rotation = 0.1;
+					const translation = 0.05;
 
-						const duration = 1000;
-						const delay = 1000;
-						const rotation = 0.1;
-						const translation = 0.05;
+					let renderer, camera, group, scene, top, middle, moving, bottom, width, height, animationStart, animationPositionStart, animationPositionEnd, movePositionTarget, moveRotationTarget;
 
-						let renderer = null;
-						let camera = null;
-						let group = null;
-						let scene = null;
-						let top = null;
-						let middle = null;
-						let moving = null;
-						let bottom = null;
-						let width = 0;
-						let height = 0;
-						let animationStart = 0;
-						let animationPositionStart = null;
-						let animationPositionEnd = null;
-						let movePositionTarget = null;
-						let moveRotationTarget = null;
+					// Listen to the "canvas" event from main thread
+					thread.on("setup", ({ detail })=>{
 
-						// Listen to the "canvas" event from main thread
-						thread.on("setup", ({ detail })=>{
+						console.log("setup", self, thread);
 
-							console.log("setup", self, thread);
+						const { offscreenCanvas, baseURL } = detail;
 
-							const { offscreenCanvas, baseURL } = detail;
+						// Import ThreeJS WebGL library if inside a worker
+						if( thread.isWorker ){
 
-							// Import ThreeJS WebGL library if inside a worker
-							if( thread.isWorker ){
+							importScripts(baseURL + "three.min.js");
 
-								importScripts(baseURL + "three.min.js");
+						}
 
-							}
+						animationPositionStart = new THREE.Vector3();
+						animationPositionEnd = new THREE.Vector3();
+						movePositionTarget = new THREE.Vector3();
+						moveRotationTarget = new THREE.Vector3();
 
-							animationPositionStart = new THREE.Vector3();
-							animationPositionEnd = new THREE.Vector3();
-							movePositionTarget = new THREE.Vector3();
-							moveRotationTarget = new THREE.Vector3();
+						function generatePlane( colors ){
 
-							function generatePlane( colors ){
+							const width = 0.25;
+							const height = 0.5;
+							const skew = 0.25;
 
-								const width = 0.25;
-								const height = 0.5;
-								const skew = 0.25;
+							const vertices = new Float32Array([
+								+width + skew, +height, 0,
+								-width + skew, +height, 0,
+								-width - skew, -height, 0,
+								+width - skew, -height, 0
+							]);
 
-								const vertices = new Float32Array([
-									+width + skew, +height, 0,
-									-width + skew, +height, 0,
-									-width - skew, -height, 0,
-									+width - skew, -height, 0
-								]);
+							const geometry = new THREE.BufferGeometry();
 
-								const geometry = new THREE.BufferGeometry();
+							geometry.setIndex([0, 1, 2, 3, 0, 2]);
+							geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
 
-								geometry.setIndex([0, 1, 2, 3, 0, 2]);
-								geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+							geometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3));
 
-								geometry.setAttribute("color", new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3));
+							for( let index = 0; index < colors.length; index++ ){
 
-								for( let index = 0; index < colors.length; index++ ){
-
-									geometry.attributes.color.setXYZ(index, colors[index].r, colors[index].g, colors[index].b);
-
-								}
-
-								const material = new THREE.MeshBasicMaterial({
-									vertexColors: true,
-									transparent: true,
-									depthTest: false
-								});
-
-								material.blending = THREE.AdditiveBlending;
-
-								const mesh = new THREE.Mesh(geometry, material);
-
-								return mesh;
+								geometry.attributes.color.setXYZ(index, colors[index].r, colors[index].g, colors[index].b);
 
 							}
 
-							renderer = new THREE.WebGLRenderer({
-								canvas: offscreenCanvas,
-								alpha: true,
-								antialias: true
+							const material = new THREE.MeshBasicMaterial({
+								vertexColors: true,
+								transparent: true,
+								depthTest: false
 							});
 
-							renderer.setClearColor(0, 0);
+							material.blending = THREE.AdditiveBlending;
 
-							camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 10);
-							camera.position.set(0, 0, 5);
+							const mesh = new THREE.Mesh(geometry, material);
 
-							scene = new THREE.Scene();
+							return mesh;
 
-							group = new THREE.Object3D();
-							scene.add(group);
+						}
 
-							top = generatePlane([
-								new THREE.Color(0xFB7FAC),
-								new THREE.Color(0xFA929E),
-								new THREE.Color(0xF4C175),
-								new THREE.Color(0xF2D461)
-							]);
+						renderer = new THREE.WebGLRenderer({
+							canvas: offscreenCanvas,
+							alpha: true,
+							antialias: true
+						});
 
-							bottom = generatePlane([
-								new THREE.Color(0x0BD6FB),
-								new THREE.Color(0x4DC9F8),
-								new THREE.Color(0x90A7EF),
-								new THREE.Color(0xA799EB)
-							]);
+						renderer.setClearColor(0, 0);
 
-							middle = generatePlane([
-								new THREE.Color(0x90A7EF),
-								new THREE.Color(0xA799EB),
-								new THREE.Color(0xFB7FAC),
-								new THREE.Color(0xFA929E)
-							]);
+						camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 10);
+						camera.position.set(0, 0, 5);
 
-							moving = generatePlane([
-								new THREE.Color(0x90A7EF),
-								new THREE.Color(0xA799EB),
-								new THREE.Color(0xFB7FAC),
-								new THREE.Color(0xFA929E)
-							]); 
+						scene = new THREE.Scene();
 
-							group.add(top);
-							group.add(middle);
-							group.add(moving);
-							group.add(bottom);
+						group = new THREE.Object3D();
+						scene.add(group);
 
-							setInterval(()=>{
+						top = generatePlane([
+							new THREE.Color(0xFB7FAC),
+							new THREE.Color(0xFA929E),
+							new THREE.Color(0xF4C175),
+							new THREE.Color(0xF2D461)
+						]);
 
-								const random = Math.random() > 0.5;
+						bottom = generatePlane([
+							new THREE.Color(0x0BD6FB),
+							new THREE.Color(0x4DC9F8),
+							new THREE.Color(0x90A7EF),
+							new THREE.Color(0xA799EB)
+						]);
 
-								animationPositionStart = random ? top.position.clone() : bottom.position.clone();
-								animationPositionEnd = random ? bottom.position.clone() : top.position.clone();
+						middle = generatePlane([
+							new THREE.Color(0x90A7EF),
+							new THREE.Color(0xA799EB),
+							new THREE.Color(0xFB7FAC),
+							new THREE.Color(0xFA929E)
+						]);
 
-								moving.position.copy(animationPositionStart);
+						moving = generatePlane([
+							new THREE.Color(0x90A7EF),
+							new THREE.Color(0xA799EB),
+							new THREE.Color(0xFB7FAC),
+							new THREE.Color(0xFA929E)
+						]); 
 
-								animationStart = performance.now();
+						group.add(top);
+						group.add(middle);
+						group.add(moving);
+						group.add(bottom);
 
-							}, 5000);
+						setInterval(()=>{
 
-							function update(){
+							const random = Math.random() > 0.5;
 
-								requestAnimationFrame(update);
+							animationPositionStart.copy(random ? top.position.clone() : bottom.position.clone());
+							animationPositionEnd.copy(random ? bottom.position.clone() : top.position.clone());
 
-								const now = performance.now();
+							moving.position.copy(animationPositionStart);
 
-								if( now >= delay ){
+							animationStart = performance.now();
 
-									const progress = Math.min(1, (now - delay) / duration);
+						}, 5000);
 
-									const easeProgress = progress * (2 - progress);
-
-									top.position.set(easeProgress * -0.05, easeProgress * 0.3, 0.2);
-									bottom.position.set(easeProgress * 0.05, easeProgress * -0.3, -0.2);
-
-									const animationProgress = Math.min(1, (now - animationStart) / duration);
-									const animationEaseProgress = animationProgress < 0.5 ? (2 * animationProgress * animationProgress) : (-1 + (4 - 2 * animationProgress) * animationProgress);
-
-									const animationDelta = animationPositionEnd.clone().sub(animationPositionStart).multiplyScalar(animationEaseProgress);
-
-									moving.position.copy(animationPositionStart).add(animationDelta);
-
-									moving.material.opacity = 1 - Math.abs(animationProgress * 2 - 1);
-
-								}
-
-								const postionDelta = movePositionTarget.clone().sub(group.position).divideScalar(6);
-
-								group.position.add(postionDelta);
-
-								const rotationDelta = moveRotationTarget.clone().sub(group.rotation.toVector3()).divideScalar(6);
-
-								group.rotation.setFromVector3(rotationDelta);
-
-								renderer.render(scene, camera);
-
-							}
+						function update(){
 
 							requestAnimationFrame(update);
 
-						});
+							const now = performance.now();
 
-						// Listen to the "mousemove" event from main thread
-						thread.on("move", ({ detail: move })=>{
+							if( now >= delay ){
 
-							const x = -((move.clientX / width) * 2 - 1);
-							const y = -((move.clientY / height) * 2 - 1);
+								const progress = Math.min(1, (now - delay) / duration);
 
-							movePositionTarget.set(x * translation, -y * translation, 0);
-							moveRotationTarget.set(y * rotation, x * rotation, 0);
+								const easeProgress = progress * (2 - progress);
 
-						});
+								top.position.set(easeProgress * -0.05, easeProgress * 0.3, 0.2);
+								bottom.position.set(easeProgress * 0.05, easeProgress * -0.3, -0.2);
 
-						// Listen to the "resize" event from main thread
-						thread.on("setSize", ({ detail: size })=>{
+								const animationProgress = Math.min(1, (now - animationStart) / duration);
+								const animationEaseProgress = animationProgress < 0.5 ? (2 * animationProgress * animationProgress) : (-1 + (4 - 2 * animationProgress) * animationProgress);
 
-							width = size.width;
-							height = size.height;
+								const animationDelta = animationPositionEnd.clone().sub(animationPositionStart).multiplyScalar(animationEaseProgress);
 
-							renderer.setSize(size.width, size.height, false);
-							renderer.setPixelRatio(size.pixelRatio);
+								moving.position.copy(animationPositionStart).add(animationDelta);
 
-							const frustum = 3;
-							const aspect = size.width / size.height;
+								moving.material.opacity = 1 - Math.abs(animationProgress * 2 - 1);
 
-							camera.left = frustum * aspect / - 2;
-							camera.right = frustum * aspect / 2;
-							camera.top = frustum / 2;
-							camera.bottom = frustum / - 2;
+							}
 
-							camera.updateProjectionMatrix();
+							const postionDelta = movePositionTarget.clone().sub(group.position).divideScalar(6);
 
-						});
+							group.position.add(postionDelta);
 
-					}, null, !supports);
+							const rotationDelta = moveRotationTarget.clone().sub(group.rotation.toVector3()).divideScalar(6);
 
-					// Transfer offscreencanvas to worker thread through a "setup" event
-					thread.transfer("setup", { offscreenCanvas, baseURL: window.location.href }, [offscreenCanvas]);
+							group.rotation.setFromVector3(rotationDelta);
 
-					// Transfer resize event to worker thread through a "setSize" event
-					window.addEventListener("resize", ()=>{
+							renderer.render(scene, camera);
 
-						const { width, height } = container.getBoundingClientRect();
+						}
 
-						thread.transfer("setSize", { width, height });
+						requestAnimationFrame(update);
 
 					});
 
-					// Transfer mousemove event to worker thread through "move" event
-					window.addEventListener("mousemove", ({ clientX, clientY })=>{
+					// Listen to the "mousemove" event from main thread
+					thread.on("move", ({ detail: move })=>{
 
-						thread.transfer("move", { clientX, clientY });
+						const x = -((move.clientX / width) * 2 - 1);
+						const y = -((move.clientY / height) * 2 - 1);
+
+						movePositionTarget.set(x * translation, -y * translation, 0);
+						moveRotationTarget.set(y * rotation, x * rotation, 0);
 
 					});
 
-					// Trigger resize event transfer to set initial canvas size
-					window.dispatchEvent(new Event("resize"));
+					// Listen to the "resize" event from main thread
+					thread.on("setSize", ({ detail: size })=>{
 
-				};
+						width = size.width;
+						height = size.height;
+
+						renderer.setSize(size.width, size.height, false);
+						renderer.setPixelRatio(size.pixelRatio);
+
+						const frustum = 3;
+						const aspect = size.width / size.height;
+
+						camera.left = frustum * aspect / - 2;
+						camera.right = frustum * aspect / 2;
+						camera.top = frustum / 2;
+						camera.bottom = frustum / - 2;
+
+						camera.updateProjectionMatrix();
+
+					});
+
+				}, null, !supports);
+
+				// Transfer offscreencanvas to worker thread through a "setup" event
+				thread.transfer("setup", { offscreenCanvas, baseURL: window.location.href }, [offscreenCanvas]);
+
+				// Transfer resize event to worker thread through a "setSize" event
+				window.addEventListener("resize", ()=>{
+
+					const { width, height } = container.getBoundingClientRect();
+
+					thread.transfer("setSize", { width, height });
+
+				});
+
+				// Transfer mousemove event to worker thread through "move" event
+				window.addEventListener("mousemove", ({ clientX, clientY })=>{
+
+					thread.transfer("move", { clientX, clientY });
+
+				});
+
+				// Trigger resize event transfer to set initial canvas size
+				window.dispatchEvent(new Event("resize"));
 			</pre>
 			<a class="toggle-code"></a>
 		</div>
@@ -278,7 +260,7 @@
 			<section>
 				<h2>Install</h2>
 				<div class="content">
-					<p>The package is published on <a href="https://www.npmjs.com/package/@threadizer/core" target="_blank" rel="noopener">npm</a> and sources are available on <a href="https://github.com/threadizer" target="_blank" rel="noopener">github</a>.</p>
+					<p>The package is published on <a href="https://www.npmjs.com/package/@threadizer/core" target="_blank" rel="noopener">npm</a>, sources and documentation are available on <a href="https://github.com/threadizer/core" target="_blank" rel="noopener">github</a>.</p>
 					<pre class="bash">npm install @threadizer/core</pre>
 				</div>
 			</section>
@@ -348,7 +330,7 @@
 				<h2>Performance</h2>
 				<div class="content">
 					<p>Running scripts within workers is the best way to avoid freezing the main-thread. Here is an example of a high CPU usage stress-test script, it will launch a loop of <span class="hljs-inline">1e4</span> iterations to sort an array.</p>
-					<p class="warning">Running the main-thread test will cause the browser to freeze the current tab during around 6 seconds (with an Intel i9). You can check how much time the main-thread got freezed in the devtools console.</p>
+					<p class="warning">Running the main-thread test will cause the browser to freeze the current tab while processing (around 6 seconds with an Intel i9, less than 20 seconds on a recent iPhone). You can check how much time the main-thread got freezed in the devtools console.</p>
 					<div class="tabs">
 						<ul>
 							<li data-tab="worker">in worker</li>

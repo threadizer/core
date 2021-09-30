@@ -19,21 +19,7 @@ export default async ( container )=>{
 		const rotation = 0.1;
 		const translation = 0.05;
 
-		let renderer = null;
-		let camera = null;
-		let group = null;
-		let scene = null;
-		let top = null;
-		let middle = null;
-		let moving = null;
-		let bottom = null;
-		let width = 0;
-		let height = 0;
-		let animationStart = 0;
-		let animationPositionStart = null;
-		let animationPositionEnd = null;
-		let movePositionTarget = null;
-		let moveRotationTarget = null;
+		let renderer, camera, group, scene, top, middle, moving, bottom, width, height, animationStart, animationPositionStart, animationPositionEnd, movePositionTarget, moveRotationTarget;
 
 		// Listen to the "canvas" event from main thread
 		thread.on("setup", ({ detail })=>{
@@ -145,8 +131,8 @@ export default async ( container )=>{
 
 				const random = Math.random() > 0.5;
 
-				animationPositionStart = random ? top.position.clone() : bottom.position.clone();
-				animationPositionEnd = random ? bottom.position.clone() : top.position.clone();
+				animationPositionStart.copy(random ? top.position.clone() : bottom.position.clone());
+				animationPositionEnd.copy(random ? bottom.position.clone() : top.position.clone());
 
 				moving.position.copy(animationPositionStart);
 
