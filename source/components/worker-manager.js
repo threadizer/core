@@ -114,11 +114,9 @@ export default function( self, tools, extension ){
 
 		});
 
-		const extending = extension?.(self);
+		if( extension instanceof Function ){
 
-		if( extending instanceof Promise ){
-
-			await extending;
+			await extension(self);
 
 		}
 

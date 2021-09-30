@@ -17,9 +17,9 @@ export default async ( unmount )=>{
 
 		}
 
-		self.transfer("complete");
-
 		console.timeEnd("performance-worker");
+
+		self.transfer("complete");
 
 	});
 

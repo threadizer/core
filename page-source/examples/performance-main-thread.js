@@ -17,9 +17,9 @@ export default async ( unmout )=>{
 
 	}
 
-	unmout();
-
 	console.timeEnd("performance-main-thread");
+
+	unmout();
 
 	return {
 		element: null,
