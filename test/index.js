@@ -10,9 +10,10 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	const offscreenCanvas = supports ? canvas.transferControlToOffscreen() : canvas;
 
-	const thread = await new Threadizer(window.location.href + "worker.js", null, !supports);
+	const threadA = await new Threadizer(window.location.href + "draw.worker.js", null, !supports);
+	const threadB = await new Threadizer(window.location.href + "convert.worker.js", null, !supports);
 
-	thread.on("rendered", ( event )=>{
+	threadA.on("rendered", ( event )=>{
 
 		console.log("MAIN THREAD - Canvas has been rendered");
 
@@ -20,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	});
 
-	await thread.transfer("canvas", offscreenCanvas);
+	await threadA.transfer("canvas", offscreenCanvas);
 
 	requestAnimationFrame(async ()=>{
 

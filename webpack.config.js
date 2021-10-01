@@ -1,5 +1,6 @@
 const { hostname } = require("os");
-const { resolve } = require("path");
+const { resolve, parse } = require("path");
+const { readdirSync } = require("fs");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const WebpackESLintPlugin = require("eslint-webpack-plugin");
 const WebpackShellPlugin = require("webpack-shell-plugin-next");
@@ -9,7 +10,11 @@ module.exports = ( env, options )=>{
 
 	const IS_DEV = options.mode === "development";
 
+	const SOURCE_PATH = resolve(__dirname, "source");
+	const TEST_PATH = resolve(__dirname, "test");
 	const BUILD_PATH = resolve(__dirname, "build");
+
+	console.log(SOURCE_PATH);
 
 	const HOST = hostname().toLowerCase();
 
@@ -35,10 +40,13 @@ module.exports = ( env, options )=>{
 		}
 	};
 
+	const workers = readdirSync(resolve(TEST_PATH, "workers")).reduce(( previous, current ) => ({ ...previous, [`${ parse(current).name }.worker`]: resolve(TEST_PATH, "workers", current) }), {});
+
 	const entries = {
-		index: "./source/index.js",
-		worker: "./test/worker.js"
+		index: "./source/index.js"
 	};
+
+	Object.assign(entries, workers);
 
 	const plugins = [
 		new WebpackShellPlugin({
@@ -68,7 +76,7 @@ module.exports = ( env, options )=>{
 				title: name,
 				filename: "index.html",
 				template: resolve(__dirname, "test/index.html"),
-				excludeChunks: ["index", "worker"]
+				chunks: ["test"]
 			})
 		);
 
@@ -90,9 +98,9 @@ module.exports = ( env, options )=>{
 		resolve: {
 			extensions: [".js", ".json"],
 			alias: {
-				"~": resolve(__dirname, "./"),
-				"@": resolve(__dirname, "./source"),
-				"†": resolve(__dirname, "./test")
+				"~": __dirname,
+				"@": SOURCE_PATH,
+				"†": TEST_PATH
 			},
 			fallback: {
 				path: require.resolve("path-browserify")

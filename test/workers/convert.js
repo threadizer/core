@@ -1,6 +1,8 @@
-console.log("App started");
+console.log("Worker 'draw' started");
 
 thread.on("canvas", async ({ detail: canvas, complete })=>{
+
+	console.log(self);
 
 	const text = thread.isWorker ? "OffscreenCanvas painted within a worker" : "OffscreenCanvas painted within main thread";
 
