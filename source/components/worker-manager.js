@@ -44,9 +44,11 @@ export default function( self, tools, extension ){
 
 				const event = new CustomEvent(type, { detail: data });
 
-				event.complete = ( done = true )=>{
+				event.complete = ( data = null )=>{
 
-					self.postMessage({ type: "transfer-answer", data: { done, id } });
+					const transferable = generateTransferables(data);
+
+					self.postMessage({ type: `transfer-answer-${ id }`, data }, transferable);
 
 				};
 
@@ -59,31 +61,17 @@ export default function( self, tools, extension ){
 
 					const id = uuid();
 
-					const transferable = new Array();
-
-					traverse(data, ( value )=>{
-
-						if( isTransferable(value) ){
-
-							self.transferable.push(value);
-
-						}
-
-					});
+					const transferable = generateTransferables(data);
 
 					const hook = ({ detail: data })=>{
 
-						if( data.id === id ){
+						this.off(`transfer-answer-${ id }`, hook);
 
-							self.off("transfer-answer", hook);
-
-							data.done ? resolve() : reject();
-
-						}
+						data !== false ? resolve(data) : reject();
 
 					};
 
-					self.on("transfer-answer", hook);
+					this.on(`transfer-answer-${ id }`, hook);
 
 					self.postMessage({ type, data, id }, transferable);
 

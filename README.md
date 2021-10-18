@@ -23,7 +23,7 @@ const thread = new Threadizer(( thread )=>{
 ```
 See more on the [github page](https://threadizer.github.io/core/)
 
-## Class
+## Threadizer Class
 
 ### Property
 
@@ -88,3 +88,19 @@ In your application, `self` refer to the current context (`worker` or `window`).
 ### Property
 
  - `isWorker`: `true` if a worker, `false` if running on main thread.
+
+
+## Stream Class
+
+### Methods
+
+#### constructor( `data` )
+
+ - `data`: *(Any)* **Optional** Mutable data transfered (and transferable) along pipes. Default `null`.
+
+### Methods
+
+#### pipe( destination )
+Transfer data along the pipe. Data can be exploited and updated. You can chain `pipe` calls.
+
+ - `destination`: *(Thread)* Worker thread (Threadizer instance) to send data to. The instance must have a `thread.on("pipe", ...)` event listener to handle calls.

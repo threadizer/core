@@ -1,12 +1,14 @@
 import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
-import traverse from "@/components/traverse.js";
+import Stream from "@/components/stream.js";
+import generateTransferables from "@/components/generate-transferables.js";
 import uuid from "@/components/uuid.js";
 
 export default class Threadizer extends EventManager {
 	#id = null;
 	#application = null;
 	#insideMainThread = false;
+	#worker = null;
 	constructor( application, extension, insideMainThread ){
 
 		super();
@@ -29,7 +31,7 @@ export default class Threadizer extends EventManager {
 	}
 	get isWorker(){
 
-		return this.worker instanceof Worker;
+		return this.#worker instanceof Worker;
 
 	}
 	async compile( application, extension, insideMainThread = false ){
@@ -38,14 +40,14 @@ export default class Threadizer extends EventManager {
 
 		const tools = `{
 			uuid: ${ uuid.toString() },
-			traverse: ${ traverse.toString() }
+			generateTransferables: ${ generateTransferables.toString() }
 		}`;
 
 		if( !insideMainThread ){
 
 			if( application instanceof Function ){
 
-				application = `(${ application.toString() })(self)`;
+				application = `/* application */(${ application.toString() })(self)`;
 
 			}
 			else if( typeof application === "string" ){
@@ -103,7 +105,7 @@ export default class Threadizer extends EventManager {
 
 		if( !this.#insideMainThread ){
 
-			this.worker = await new Promise(( resolve )=>{
+			this.#worker = await new Promise(( resolve )=>{
 
 				const blob = new Blob([this.#application], { type: "text/javascript" });
 
@@ -111,7 +113,13 @@ export default class Threadizer extends EventManager {
 
 				const worker = new Worker(url);
 
-				this.on("worker-ready", () => resolve(worker), { once: true });
+				this.on("worker-ready", ()=>{
+
+					URL.revokeObjectURL(url);
+
+					resolve(worker);
+
+				}, { once: true });
 
 				worker.addEventListener("message", ( event )=>{
 
@@ -119,7 +127,7 @@ export default class Threadizer extends EventManager {
 
 					this.dispatch(type, data, ( done = true )=>{
 
-						this.worker.postMessage({ type: "transfer-answer", data: { done, id } });
+						this.#worker.postMessage({ type: `transfer-answer-${ id }`, data: { done, id } });
 
 					});
 
@@ -149,40 +157,26 @@ export default class Threadizer extends EventManager {
 
 			const hook = ({ detail: data })=>{
 
-				if( data.id === id ){
+				this.off(`transfer-answer-${ id }`, hook);
 
-					this.off("transfer-answer", hook);
-
-					data.done ? resolve() : reject();
-
-				}
+				data !== false ? resolve(data) : reject();
 
 			};
 
-			this.on("transfer-answer", hook);
+			this.on(`transfer-answer-${ id }`, hook);
 
 			if( this.isWorker ){
 
-				const transferable = new Array();
+				const transferable = generateTransferables(data);
 
-				traverse(data, ( value )=>{
-
-					if( Threadizer.isTransferable(value) ){
-
-						transferable.push(value);
-
-					}
-
-				});
-
-				this.worker.postMessage({ type, data, id }, transferable);
+				this.#worker.postMessage({ type, data, id }, transferable);
 
 			}
 			else {
 
 				this.dispatch(type, data, ( done = true )=>{
 
-					this.dispatch("transfer-answer", { done, id });
+					this.dispatch(`transfer-answer-${ id }`, { done, id });
 
 				});
 
@@ -204,25 +198,16 @@ export default class Threadizer extends EventManager {
 	}
 	destroy(){
 
-		this.worker?.terminate();
+		this.#worker?.terminate();
 
 		this.off();
 
 		return this;
 
 	}
-	static isTransferable( value ){
+	static createStream( data ){
 
-		try {
-
-			return value instanceof window.ArrayBuffer || value instanceof window.MessagePort || value instanceof window.ImageBitmap || value instanceof window.OffscreenCanvas;
-
-		}
-		catch( error ){
-
-			return false;
-
-		}
+		return new Stream(data);
 
 	}
 }

@@ -1,26 +1,42 @@
 console.log("Worker 'draw' started");
 
-thread.on("canvas", async ({ detail: canvas, complete })=>{
+let canvas = null;
+let context = null;
 
-	console.log(self);
+thread.on("pipe", ({ detail, complete })=>{
 
-	const text = thread.isWorker ? "OffscreenCanvas painted within a worker" : "OffscreenCanvas painted within main thread";
+	if( !canvas && detail instanceof OffscreenCanvas ){
 
-	const context = canvas.getContext("2d");
+		canvas = detail;
+		context = canvas.getContext("2d");
 
-	context.fillRect(0, 0, canvas.width, canvas.height);
+	}
 
-	Object.assign(context, {
-		fillStyle: "#FFF",
-		font: "13px sans-serif",
-		textAlign: "center",
-		textBaseline: "middle"
-	});
+	if( detail instanceof OffscreenCanvas ){
 
-	context.fillText(text, canvas.width / 2, canvas.height / 2, canvas.width);
+		const text = thread.isWorker ? "OffscreenCanvas painted within a worker" : "OffscreenCanvas painted within main thread";
 
-	await thread.transfer("rendered");
+		context.fillRect(0, 0, canvas.width, canvas.height);
 
-	complete();
+		Object.assign(context, {
+			fillStyle: "#FFF",
+			font: "13px sans-serif",
+			textAlign: "center",
+			textBaseline: "middle"
+		});
+
+		context.fillText(text, canvas.width / 2, canvas.height / 2, canvas.width);
+
+
+	}
+	else if( detail instanceof ImageData ){
+
+		context.putImageData(detail, 0, 0);
+
+	}
+
+	const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+	complete(imageData);
 
 });

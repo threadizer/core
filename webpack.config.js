@@ -33,7 +33,7 @@ module.exports = ( env, options )=>{
 		historyApiFallback: true,
 		host: HOST,
 		hot: true,
-		https: true,
+		https: false,
 		open: true,
 		static: {
 			directory: BUILD_PATH,
@@ -67,7 +67,7 @@ module.exports = ( env, options )=>{
 	if( IS_DEV ){
 
 		Object.assign(entries, {
-			test: "./test/index.js"
+			test: "./test/test.js"
 		});
 
 		plugins.push(
