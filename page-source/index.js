@@ -6,7 +6,8 @@ const EXAMPLES = {
 	"precompiled": require("†/examples/precompiled.js").default,
 	"performance-worker": require("†/examples/performance-worker.js").default,
 	"performance-main-thread": require("†/examples/performance-main-thread.js").default,
-	"subworkers": require("†/examples/subworkers.js").default
+	"subworkers": require("†/examples/subworkers.js").default,
+	"playground": require("†/examples/playground.js").default
 };
 
 import "†/assets/styles/main.scss";
@@ -47,9 +48,44 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 		pre.innerHTML = pre.innerHTML.replace(new RegExp(ignoredTabs, "g"), "\n").replace(/\t+$/, "").replace(/^\n/, "");
 
-		Highlighter.highlightElement(pre);
-
 		const script = EXAMPLES[pre.dataset.script];
+		const isEditable = pre.hasAttribute("contenteditable");
+
+		if( isEditable ){
+
+			const clone = pre.cloneNode(true);
+
+			clone.removeAttribute("contenteditable");
+
+			document.addEventListener("keydown", event => {
+
+				if( event.key === "Enter" ){
+
+					event.preventDefault();
+
+					document.execCommand("insertLineBreak");
+				}
+
+			});
+
+			pre.addEventListener("input", ()=>{
+
+				clone.innerHTML = pre.innerHTML.replace(/<br\/>/g, "\n");
+
+				Highlighter.highlightElement(clone);
+
+			});
+
+			pre.parentElement.appendChild(clone);
+
+			pre.dispatchEvent(new Event("input"));
+
+		}
+		else {
+
+			Highlighter.highlightElement(pre);
+
+		}
 
 		if( script ){
 
@@ -63,13 +99,28 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 					requestAnimationFrame(async ()=>{
 
-						button.runningScript = await script(()=>{
+						if( isEditable ){
 
-							button.classList.remove("running");
+							button.runningScript = await script(pre.innerHTML, ()=>{
 
-							button.runningScript?.element?.remove();
+								button.classList.remove("running");
 
-						});
+								button.runningScript?.element?.remove();
+
+							});
+
+						}
+						else {
+
+							button.runningScript = await script(()=>{
+
+								button.classList.remove("running");
+
+								button.runningScript?.element?.remove();
+
+							});
+
+						}
 
 						if( button.runningScript ){
 

@@ -14,6 +14,11 @@ $background-color-light: #3E3E3E;
 	background-color: $background-color-light;
 }
 
+.warning .hljs-inline {
+	color: $background-color;
+	background-color: rgba($background-color-light, 0.2);
+}
+
 pre {
 	box-sizing: border-box;
 	border-radius: 1rem;
@@ -128,6 +133,30 @@ pre {
 
 	pre {
 		margin-top: 0;
+	}
+}
+
+.playground {
+	margin-top: 2rem;
+
+	pre[contenteditable] {
+		z-index: 1;
+		margin-top: 0;
+		-webkit-text-fill-color: transparent;
+		caret-color: #FFF;
+
+		& + pre {
+			z-index: 0;
+			position: absolute;
+			margin-top: 0;
+			top: 0;
+			width: 100%;
+			pointer-events: none;
+
+			* {
+				font-weight: unset !important;
+			}
+		}
 	}
 }
 
