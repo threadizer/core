@@ -1,5 +1,6 @@
 const { hostname } = require("os");
-const { resolve } = require("path");
+const { resolve, parse } = require("path");
+const { readdirSync } = require("fs");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const WebpackShellPlugin = require("webpack-shell-plugin-next");
 const WebpackMiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -11,6 +12,8 @@ module.exports = ( env, options )=>{
 
 	const IS_DEV = options.mode === "development";
 
+	const SOURCE_PATH = resolve(__dirname, "source");
+	const TEST_PATH = resolve(__dirname, "page-source");
 	const BUILD_PATH = resolve(__dirname, "docs");
 
 	const HOST = hostname().toLowerCase();
@@ -20,7 +23,8 @@ module.exports = ( env, options )=>{
 		client: {
 			webSocketURL: {
 				hostname: HOST
-			}
+			},
+			logging: "none"
 		},
 		compress: false,
 		devMiddleware: {
@@ -30,7 +34,7 @@ module.exports = ( env, options )=>{
 		historyApiFallback: true,
 		host: HOST,
 		hot: true,
-		https: true,
+		https: false,
 		open: true,
 		static: {
 			directory: BUILD_PATH,
@@ -77,6 +81,24 @@ module.exports = ( env, options )=>{
 		new WebpackESLintPlugin()
 	];
 
+	// if( IS_DEV ){
+
+	// 	Object.assign(entries, {
+	// 		test: "./test/test.js"
+	// 	});
+
+	// 	plugins.push(
+	// 		new HTMLWebpackPlugin({
+	// 			publicPath: "./",
+	// 			title: name,
+	// 			filename: "index.html",
+	// 			template: resolve(__dirname, "test/index.html"),
+	// 			chunks: ["test"]
+	// 		})
+	// 	);
+
+	// }
+
 	return {
 		mode: options.mode,
 		entry: entries,
@@ -93,9 +115,9 @@ module.exports = ( env, options )=>{
 		resolve: {
 			extensions: [".js", ".json"],
 			alias: {
-				"~": resolve(__dirname, "./"),
-				"@": resolve(__dirname, "./source"),
-				"†": resolve(__dirname, "./page-source")
+				"~": __dirname,
+				"@": SOURCE_PATH,
+				"†": TEST_PATH
 			},
 			fallback: {
 				path: require.resolve("path-browserify")

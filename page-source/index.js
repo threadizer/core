@@ -3,7 +3,7 @@ import Highlighter from "highlight.js";
 const EXAMPLES = {
 	"header": require("†/examples/header.js").default,
 	"quick-start": require("†/examples/quick-start.js").default,
-	"compiled-workers": require("†/examples/compiled-workers.js").default,
+	"precompiled": require("†/examples/precompiled.js").default,
 	"performance-worker": require("†/examples/performance-worker.js").default,
 	"performance-main-thread": require("†/examples/performance-main-thread.js").default,
 	"subworkers": require("†/examples/subworkers.js").default

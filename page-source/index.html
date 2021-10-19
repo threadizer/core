@@ -295,7 +295,7 @@
 							<li data-tab="main">main.js</li>
 							<li data-tab="worker">worker.js</li>
 						</ul>
-						<pre class="current full javascript" data-file="main" data-script="compiled-workers">
+						<pre class="current full javascript" data-file="main" data-script="precompiled">
 							import Threadizer from "@threadizer/core";
 
 							const thread = await new Threadizer("path/to/worker.js");
@@ -341,7 +341,7 @@
 						</pre>
 						<a class="run-code console"></a>
 						<pre class="current full javascript" data-file="worker">
-							const Threadizer = self.Threadizer.default;
+							import Threadizer from "@threadizer/core";
 
 							const subthreadA = await new Threadizer(()=>{
 
