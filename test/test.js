@@ -20,4 +20,12 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	// console.log("THREAD RETURNED", linkThread);
 
+	const textStream = Threadizer.createStream("hello world!");
+
+	const textThread = await new Threadizer(window.location.href + "simple-pipe.worker.js");
+
+	const results = await textStream.pipe(textThread).pipe(textThread);
+
+	console.log("RESULTS --->", results); // Output "hello wolrd!"
+
 }, { once: true });

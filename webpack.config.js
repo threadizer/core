@@ -23,7 +23,8 @@ module.exports = ( env, options )=>{
 		client: {
 			webSocketURL: {
 				hostname: HOST
-			}
+			},
+			logging: "none"
 		},
 		compress: false,
 		devMiddleware: {

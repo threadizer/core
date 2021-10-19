@@ -8,7 +8,13 @@ The project is [published on npm](https://www.npmjs.com/package/@threadizer/core
 npm install @theadizer/core
 ```
 
-## Quick start
+## Application (worker or main thread)
+You can access the global variable `thread` within your application code which also contains the methods (reversed) `on()`, `off()`, `dispatch()` and `transfer()`.
+In your application, `self` refer to the current context (`worker` or `window`).
+
+## Threadizer Class
+
+### Quick start
 ```javascript
 import Threadizer from "@threadizer/core";
 
@@ -22,8 +28,6 @@ const thread = new Threadizer(( thread )=>{
 
 ```
 See more on the [github page](https://threadizer.github.io/core/)
-
-## Threadizer Class
 
 ### Property
 
@@ -41,7 +45,6 @@ Leave `application` empty if you dont want the worker to be automaticaly created
 #### async compile( `application`, `extension`, `insideMainThread` )
 Compile the application, manager and its extension.
 That method is called by the constructor if `application` is defined or you can call it at any moment.
-
  - `application`: *(Function|URL)* **Optional** The application (Function) to run within the worker or the worker direct file itself.
  - `extension`: *(Function)* **Optional** Function launched to extends the worker-manager (add global methods, libraries, variables, ...).
  - `insideMainThread`: *(Boolean)* **Optional** Set to `true` if the application must run in main thread (no Worker involved). Default `false`.
@@ -51,15 +54,15 @@ Run the application within a worker or not depending on previously compiled meth
 
 #### transfer( `type`, `data` )
 Send data as event from main thread to application
-
  - `type`: *(String)* The name of the event to transfer to the worker.
  - `data`: *(Any)* **Optional** Data or content to transfer to the worker.
 
-#### destroy()
-Terminate the application.
+#### close( `timeout` )
+Send a close event to the worker so it can stop softly. It destroy the worker if timeout expired.
+ - `timeout`: *(Number)* Milliseconds after what the worker will be forced destroyed.
 
-#### static isTransferable( value )
-Return true if value is transferable between main-thread and worker.
+#### destroy()
+Terminate the application immediatly.
 
 #### on( `type`, `action`, `options` )
 Add event listener to the class.
@@ -80,27 +83,44 @@ Return a `Promise`.
  - `options`: *(Any)* **Optional** The options passed to the creation of the [`CustomEvent`](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent)
  - `callback`: *(Function)* **Optional** A callback triggered inside the event action by calling `event.complete()`.
 
-## Application (worker or main thread)
+#### static createStream( `data` )
+Create and return a Stream class. See [`Stream`](#stream-class) for more info about how to use streams.
 
-You can access the global variable `thread` within your application code which also contains the methods (reversed) `on()`, `off()`, `dispatch()` and `transfer()` and `static isTransferable()`.
-In your application, `self` refer to the current context (`worker` or `window`).
-
-### Property
-
- - `isWorker`: `true` if a worker, `false` if running on main thread.
-
+ - `data` *(Any)* **optional** Mutable data transfered (and transferable) along pipes. Default null.
 
 ## Stream Class
 
+### Quick start
+```javascript
+import Threadizer from "@threadizer/core";
+
+const stream = Threadizer.createStream("hello world!");
+
+const thread = new Threadizer(( thread )=>{
+
+    thread.on("pipe", ({ detail: data, complete })=>{
+
+        complete([...data].reverse().join(""));
+
+    });
+
+});
+
+// Call pipe to send the stream to the thread.
+const results = await stream.pipe(thread);
+console.log(results); // Output "!dlrow olleh"
+
+// Or
+// You can chain pipe calls
+const results = await stream.pipe(thread).pipe(thread);
+console.log(results); // Output "hello world!"
+
+```
+See more on the [github page](https://threadizer.github.io/core/)
+
 ### Methods
 
-#### constructor( `data` )
+#### constructor( `application`, `extension`, `insideMainThread` )
+Leave `application` empty if you dont want the worker to be automaticaly created.
 
- - `data`: *(Any)* **Optional** Mutable data transfered (and transferable) along pipes. Default `null`.
-
-### Methods
-
-#### pipe( destination )
-Transfer data along the pipe. Data can be exploited and updated. You can chain `pipe` calls.
-
- - `destination`: *(Thread)* Worker thread (Threadizer instance) to send data to. The instance must have a `thread.on("pipe", ...)` event listener to handle calls.
+ - `application`: *(Function|URL)* **Optional** The application (Function) to run within the worker or the worker direct file itself.

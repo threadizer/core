@@ -11,11 +11,30 @@ export default class Stream {
 	}
 	pipe( destination ){
 
+		const promise = new Promise(async ( resolve )=>{
+
+			this.#createPipe(destination);
+
+			await this.#run();
+
+			resolve(this.#data);
+
+		});
+
+		promise.pipe = ( destination )=>{
+
+			this.#createPipe(destination);
+
+			return promise;
+
+		};
+
+		return promise;
+
+	}
+	#createPipe( destination ){
+
 		this.#pipes.push(destination);
-
-		this.#run();
-
-		return this;
 
 	}
 	async #run(){
@@ -24,17 +43,15 @@ export default class Stream {
 
 			this.#running = true;
 
-			const thread = this.#pipes.shift();
+			const destination = this.#pipes.shift();
 
-			this.#data = await thread.transfer("pipe", this.#data);
+			this.#data = await destination.transfer("pipe", this.#data);
 
 			this.#running = false;
 
-			this.#run();
+			await this.#run();
 
 		}
-
-		return this;
 
 	}
 }
