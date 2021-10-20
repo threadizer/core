@@ -81,24 +81,6 @@ module.exports = ( env, options )=>{
 		new WebpackESLintPlugin()
 	];
 
-	// if( IS_DEV ){
-
-	// 	Object.assign(entries, {
-	// 		test: "./test/test.js"
-	// 	});
-
-	// 	plugins.push(
-	// 		new HTMLWebpackPlugin({
-	// 			publicPath: "./",
-	// 			title: name,
-	// 			filename: "index.html",
-	// 			template: resolve(__dirname, "test/index.html"),
-	// 			chunks: ["test"]
-	// 		})
-	// 	);
-
-	// }
-
 	return {
 		mode: options.mode,
 		entry: entries,

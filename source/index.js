@@ -4,6 +4,8 @@ import Stream from "@/components/stream.js";
 import generateTransferables from "@/components/generate-transferables.js";
 import uuid from "@/components/uuid.js";
 
+export { Stream };
+
 export default class Threadizer extends EventManager {
 	#id = null;
 	#application = null;
@@ -29,7 +31,7 @@ export default class Threadizer extends EventManager {
 		});
 
 	}
-	get isWorker(){
+	get #isWorker(){
 
 		return this.#worker instanceof Worker;
 
@@ -165,7 +167,7 @@ export default class Threadizer extends EventManager {
 
 			this.on(`transfer-answer-${ id }`, hook);
 
-			if( this.isWorker ){
+			if( this.#isWorker ){
 
 				const transferable = generateTransferables(data);
 

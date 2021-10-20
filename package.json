@@ -1,10 +1,14 @@
 {
   "name": "@threadizer/core",
-  "version": "0.6.1",
+  "version": "0.6.3",
   "description": "Execute code within a worker",
   "main": "build/index.js",
   "directories": {
     "test": "test"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
   },
   "scripts": {
     "start": "npm run clean && webpack serve --mode development --stats-children",
