@@ -1,4 +1,4 @@
-import Threadizer from "@/index.js";
+import Threadizer, { Stream } from "@/index.js";
 
 document.addEventListener("DOMContentLoaded", async ()=>{
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	// console.log("THREAD RETURNED", linkThread);
 
-	const textStream = Threadizer.createStream("hello world!");
+	const textStream = new Stream("hello world!");
 
 	const textThread = await new Threadizer(window.location.href + "simple-pipe.worker.js");
 
