@@ -3,6 +3,5 @@ Thumbs.db
 *.log
 *.tmp
 node_modules/
-page-source/
 build/
 test/
