@@ -1,8 +1,11 @@
 import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
 import Stream from "@/components/stream.js";
-import generateTransferables from "@/components/generate-transferables.js";
-import uuid from "@/components/uuid.js";
+import traverse from "@/components/transverse/traverse.js";
+import generateTransferables from "@/components/transverse/generate-transferables.js";
+import generateStructure from "@/components/transverse/generate-structure.js";
+import proxify from "@/components/transverse/proxify.js";
+import uuid from "@/components/transverse/uuid.js";
 
 export { Stream };
 
@@ -42,14 +45,17 @@ export default class Threadizer extends EventManager {
 
 		const tools = `{
 			uuid: ${ uuid.toString() },
-			generateTransferables: ${ generateTransferables.toString() }
+			traverse: ${ traverse.toString() },
+			proxify: ${ proxify.toString() },
+			generateTransferables: ${ generateTransferables.toString() },
+			generateStructure: ${ generateStructure.toString() }
 		}`;
 
 		if( !insideMainThread ){
 
 			if( application instanceof Function ){
 
-				application = `/* application */(${ application.toString() })(self)`;
+				application = `(${ application.toString() })(self)`;
 
 			}
 			else if( typeof application === "string" ){
@@ -58,16 +64,17 @@ export default class Threadizer extends EventManager {
 
 			}
 
+
 			this.#application = `(function(){
 
 				(${ WorkerManager })(self, ${ tools }, ${ extension }).then(function(){
 
+					/* application */
 					${ application }
 
 				});
 
 			})()`;
-
 		}
 		else {
 
@@ -205,6 +212,35 @@ export default class Threadizer extends EventManager {
 		this.off();
 
 		return this;
+
+	}
+	static async link( application ){
+
+		const thread = await new Threadizer(application);
+
+		const structure = await thread.transfer("link");
+
+		// return proxify(structure.isClass ? class Link {} : {});
+		return proxify(structure, {
+			onGet: ( target )=>{
+
+				// thread.transfer("link-get");
+
+			},
+			onSet: ( target, property, value )=>{
+
+				console.log("MAIN SET", target, property, value);
+
+				thread.transfer("link-set", { path: target.__path__, property, value });
+
+			},
+			onConstruct: ()=>{
+
+			},
+			onApply: ()=>{
+
+			}
+		});
 
 	}
 	static createStream( data ){

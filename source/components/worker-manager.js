@@ -1,10 +1,18 @@
-export default function( self, tools, extension ){
+export default function WorkerManager( self, tools, extension ){
 
 	Object.assign(self, { thread: self }, tools);
 
 	return new Promise(async ( resolve )=>{
 
 		const events = new Array();
+		const linked = {
+			registered: false,
+			source: null,
+			isClass: false,
+			// instance: null,
+			callable: null,
+			answer: null
+		};
 
 		Object.assign(self, {
 			get isWorker(){
@@ -78,16 +86,33 @@ export default function( self, tools, extension ){
 				});
 
 			},
-			isTransferable( value ){
+			link( source ){
 
-				try {
+				if( !linked.registered ){
 
-					return value instanceof window.ArrayBuffer || value instanceof window.MessagePort || value instanceof window.ImageBitmap || value instanceof window.OffscreenCanvas;
+					const structure = proxify(generateStructure(source), {
+						onGet( value ){
+
+							console.log("WORKER get", value);
+
+						}
+					});
+
+					Object.assign(linked, {
+						registered: true,
+						isClass: !!source.prototype?.constructor,
+						source,
+						structure
+					});
+
+					linked.answer?.(linked.structure);
+
+					return structure;
 
 				}
-				catch( error ){
+				else {
 
-					return false;
+					throw new Error("Cannot register a link more than once per worker.");
 
 				}
 
@@ -99,6 +124,49 @@ export default function( self, tools, extension ){
 			const { type, data, id } = event.data;
 
 			self.dispatch(type, data, id);
+
+		});
+
+		self.on("link", ({ complete })=>{
+
+			console.log("link request");
+
+			if( linked.registered ){
+
+				complete(linked.structure);
+
+			}
+			else {
+
+				linked.answer = complete;
+
+			}
+
+		}, { once: true });
+
+		self.on("link-get", ({ detail, complete })=>{
+
+			console.log("LINK GET", detail);
+
+		});
+
+		self.on("link-set", ({ detail: { path, property, value }, complete })=>{
+
+			// const { path, property, value } = detail;
+
+			let target = linked.source;
+
+			for( let key of path ){
+
+				target = target[key];
+
+			}
+
+			target[property] = value;
+
+			complete(linked.structure);
+
+			console.log("LINK SET", "ONTO", target);
 
 		});
 

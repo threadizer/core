@@ -1,31 +1,41 @@
-import Threadizer, { Stream } from "@/index.js";
+import Threadizer/*, { Stream }*/ from "@/index.js";
 
 document.addEventListener("DOMContentLoaded", async ()=>{
 
-	const canvas = document.createElement("canvas");
+	console.log("test.js");
 
-	document.body.appendChild(canvas);
+	const Linked = await Threadizer.link(window.location.href + "main.worker.js");
+	// console.log("static", Linked.content.data.style);
+	// console.log("INSTANCE ->", Linked);
 
-	const supports = canvas.transferControlToOffscreen instanceof Function;
+	Linked.toto = "tata";
 
-	const offscreenCanvas = supports ? canvas.transferControlToOffscreen() : canvas;
+	console.log(Linked);
 
-	const mainThread = await new Threadizer(window.location.href + "main.worker.js", null, !supports);
+	// const canvas = document.createElement("canvas");
 
-	mainThread.transfer("setup-canvas", offscreenCanvas);
+	// document.body.appendChild(canvas);
 
-	// const linkThread = await Threadizer.link(window.location.href + "link.worker.js");
+	// const supports = canvas.transferControlToOffscreen instanceof Function;
 
-	// linkThread.log();
+	// const offscreenCanvas = supports ? canvas.transferControlToOffscreen() : canvas;
 
-	// console.log("THREAD RETURNED", linkThread);
+	// const mainThread = await new Threadizer(window.location.href + "main.worker.js", null, !supports);
 
-	const textStream = new Stream("hello world!");
+	// mainThread.transfer("setup-canvas", offscreenCanvas);
 
-	const textThread = await new Threadizer(window.location.href + "simple-pipe.worker.js");
+	// // const linkThread = await Threadizer.link(window.location.href + "link.worker.js");
 
-	const results = await textStream.pipe(textThread).pipe(textThread);
+	// // linkThread.log();
 
-	console.log("RESULTS --->", results); // Output "hello wolrd!"
+	// // console.log("THREAD RETURNED", linkThread);
+
+	// const textStream = new Stream("hello world!");
+
+	// const textThread = await new Threadizer(window.location.href + "simple-pipe.worker.js");
+
+	// const results = await textStream.pipe(textThread).pipe(textThread);
+
+	// console.log("RESULTS --->", results); // Output "hello wolrd!"
 
 }, { once: true });

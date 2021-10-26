@@ -14,8 +14,6 @@ module.exports = ( env, options )=>{
 	const TEST_PATH = resolve(__dirname, "test");
 	const BUILD_PATH = resolve(__dirname, "build");
 
-	console.log(SOURCE_PATH);
-
 	const HOST = hostname().toLowerCase();
 
 	const server = {
@@ -41,13 +39,9 @@ module.exports = ( env, options )=>{
 		}
 	};
 
-	const workers = readdirSync(resolve(TEST_PATH, "workers")).reduce(( previous, current ) => ({ ...previous, [`${ parse(current).name }.worker`]: resolve(TEST_PATH, "workers", current) }), {});
-
 	const entries = {
 		index: "./source/index.js"
 	};
-
-	Object.assign(entries, workers);
 
 	const plugins = [
 		new WebpackShellPlugin({
@@ -67,9 +61,9 @@ module.exports = ( env, options )=>{
 
 	if( IS_DEV ){
 
-		Object.assign(entries, {
-			test: "./test/test.js"
-		});
+		const workers = readdirSync(resolve(TEST_PATH, "workers")).reduce(( previous, current ) => ({ ...previous, [`${ parse(current).name }.worker`]: resolve(TEST_PATH, "workers", current) }), {});
+
+		Object.assign(entries, { test: "./test/test.js" }, workers);
 
 		plugins.push(
 			new HTMLWebpackPlugin({
