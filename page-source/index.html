@@ -231,7 +231,7 @@
 				}, null, !supports);
 
 				// Transfer offscreencanvas to worker thread through a "setup" event
-				thread.transfer("setup", { offscreenCanvas, baseURL: window.location.href }, [offscreenCanvas]);
+				thread.transfer("setup", { offscreenCanvas, baseURL: window.location.href });
 
 				// Transfer resize event to worker thread through a "setSize" event
 				window.addEventListener("resize", ()=>{
@@ -281,7 +281,7 @@
 
 						const buffer = new ArrayBuffer(1000);
 
-						thread.transfer("custom-event", buffer, [buffer]);
+						thread.transfer("custom-event", buffer);
 					</pre>
 					<a class="run-code console"></a>
 				</div>
