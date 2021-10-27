@@ -14,8 +14,6 @@ module.exports = ( env, options )=>{
 	const TEST_PATH = resolve(__dirname, "test");
 	const BUILD_PATH = resolve(__dirname, "build");
 
-	console.log(SOURCE_PATH);
-
 	const HOST = hostname().toLowerCase();
 
 	const server = {
@@ -102,9 +100,6 @@ module.exports = ( env, options )=>{
 				"~": __dirname,
 				"@": SOURCE_PATH,
 				"†": TEST_PATH
-			},
-			fallback: {
-				path: require.resolve("path-browserify")
 			}
 		},
 		module: {
