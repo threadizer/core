@@ -1,15 +1,17 @@
-export default function proxify( source, callbacks = {} ){
+export default function proxify( source, callbacks = {}, origin = null ){
 
 	const { onGet, onSet, onConstruct, onApply } = callbacks;
+
+	function resolveValue( target, property ){
+
+		console.log("resolve", target, property);
+
+	};
 
 	return new Proxy(source, {
 		get( target, property ){
 
 			const value = Reflect.get(target, property);
-
-			const realValue = resolveValue(value);
-
-			console.log(value, realValue);
 
 			if( value instanceof Object ){
 
@@ -17,6 +19,8 @@ export default function proxify( source, callbacks = {} ){
 
 			}
 			else {
+
+				const realValue = resolveValue(target, property);
 
 				return onGet ? onGet(value) : value;
 

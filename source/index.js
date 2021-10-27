@@ -64,7 +64,6 @@ export default class Threadizer extends EventManager {
 
 			}
 
-
 			this.#application = `(function(){
 
 				(${ WorkerManager })(self, ${ tools }, ${ extension }).then(function(){
@@ -75,6 +74,7 @@ export default class Threadizer extends EventManager {
 				});
 
 			})()`;
+
 		}
 		else {
 

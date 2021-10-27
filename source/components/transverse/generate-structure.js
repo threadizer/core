@@ -1,4 +1,4 @@
-export default function generateStructure( object ){
+export default function generateStructure( source ){
 
 	const traverse = self.traverse || require("@/components/transverse/traverse").default;
 
@@ -7,7 +7,7 @@ export default function generateStructure( object ){
 		__type__: typeof source
 	};
 
-	traverse(object, ( value, key, memory = new Array() )=>{
+	traverse(source, ( value, key, memory = new Array() )=>{
 
 		if( key ){
 

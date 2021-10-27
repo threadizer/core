@@ -1,5 +1,7 @@
 export default function WorkerManager( self, tools, extension ){
 
+	console.log("worker manager started", self);
+
 	Object.assign(self, { thread: self }, tools);
 
 	return new Promise(async ( resolve )=>{
@@ -87,6 +89,8 @@ export default function WorkerManager( self, tools, extension ){
 
 			},
 			link( source ){
+
+				console.log("link worker");
 
 				if( !linked.registered ){
 

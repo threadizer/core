@@ -51,7 +51,7 @@ console.log("main.js");
 
 	const prox = thread.link(obj);
 
-	console.log("PROX ?", prox.hello);
+	// console.log("PROX ?", prox.hello);
 
 })();
 
