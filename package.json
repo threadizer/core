@@ -1,6 +1,6 @@
 {
   "name": "@threadizer/core",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Execute code within a worker",
   "main": "build/index.js",
   "directories": {
@@ -48,7 +48,6 @@
     "highlight.js": "^11.2.0",
     "html-webpack-plugin": "^5.3.2",
     "mini-css-extract-plugin": "^2.3.0",
-    "path-browserify": "^1.0.1",
     "sass": "^1.41.1",
     "sass-loader": "^12.1.0",
     "webpack": "^5.52.1",

@@ -100,9 +100,6 @@ module.exports = ( env, options )=>{
 				"~": __dirname,
 				"@": SOURCE_PATH,
 				"†": TEST_PATH
-			},
-			fallback: {
-				path: require.resolve("path-browserify")
 			}
 		},
 		module: {
