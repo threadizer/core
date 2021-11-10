@@ -49,7 +49,7 @@ export default class Threadizer extends EventManager {
 
 			if( application instanceof Function ){
 
-				application = `/* application */(${ application.toString() })(self)`;
+				application = `(${ application.toString() })(self)`;
 
 			}
 			else if( typeof application === "string" ){
@@ -62,6 +62,7 @@ export default class Threadizer extends EventManager {
 
 				(${ WorkerManager })(self, ${ tools }, ${ extension }).then(function(){
 
+					/* application */
 					${ application }
 
 				});
@@ -92,6 +93,7 @@ export default class Threadizer extends EventManager {
 
 				}
 
+				/* application */
 				${ application }
 
 				thread.worker = window["${ this.#id }"];

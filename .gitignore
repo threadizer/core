@@ -2,6 +2,7 @@
 Thumbs.db
 *.log
 *.tmp
+*.hot-update.*
 node_modules/
 build/
 test/

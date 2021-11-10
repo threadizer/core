@@ -38,17 +38,17 @@ export default async ( container )=>{
 			movePositionTarget = new THREE.Vector3();
 			moveRotationTarget = new THREE.Vector3();
 
-			function generatePlane( colors ){
+			function generatePlane( colors, z = 0 ){
 
 				const width = 0.25;
 				const height = 0.5;
 				const skew = 0.25;
 
 				const vertices = new Float32Array([
-					+width + skew, +height, 0,
-					-width + skew, +height, 0,
-					-width - skew, -height, 0,
-					+width - skew, -height, 0
+					+width + skew, +height, z,
+					-width + skew, +height, z,
+					-width - skew, -height, z,
+					+width - skew, -height, z
 				]);
 
 				const geometry = new THREE.BufferGeometry();
@@ -99,28 +99,28 @@ export default async ( container )=>{
 				new THREE.Color(0xFA929E),
 				new THREE.Color(0xF4C175),
 				new THREE.Color(0xF2D461)
-			]);
+			], 2);
 
 			bottom = generatePlane([
 				new THREE.Color(0x0BD6FB),
 				new THREE.Color(0x4DC9F8),
 				new THREE.Color(0x90A7EF),
 				new THREE.Color(0xA799EB)
-			]);
+			], -2);
 
 			middle = generatePlane([
 				new THREE.Color(0x90A7EF),
 				new THREE.Color(0xA799EB),
 				new THREE.Color(0xFB7FAC),
 				new THREE.Color(0xFA929E)
-			]);
+			], 0);
 
 			moving = generatePlane([
 				new THREE.Color(0x90A7EF),
 				new THREE.Color(0xA799EB),
 				new THREE.Color(0xFB7FAC),
 				new THREE.Color(0xFA929E)
-			]); 
+			], 0); 
 
 			group.add(top);
 			group.add(middle);
@@ -183,13 +183,13 @@ export default async ( container )=>{
 		});
 
 		// Listen to the "move" event from main thread
-		thread.on("move", ({ detail: move })=>{
+		thread.on("move", ({ detail: { clientX, clientY } })=>{
 
-			const x = -((move.clientX / width) * 2 - 1);
-			const y = -((move.clientY / height) * 2 - 1);
+			const x = -((clientX / width) * 2 - 1);
+			const y = -((clientY / height) * 2 - 1);
 
-			movePositionTarget.set(x * translation, -y * translation, 0);
-			moveRotationTarget.set(y * rotation, x * rotation, 0);
+			movePositionTarget.set(-x * translation, y * translation, 0);
+			moveRotationTarget.set(y * rotation, -x * rotation, 0);
 
 		});
 
@@ -229,7 +229,7 @@ export default async ( container )=>{
 	});
 
 	// Transfer mousemove event to worker thread through "move" event
-	window.addEventListener("mousemove", ({ clientX, clientY })=>{
+	canvas.addEventListener("mousemove", ({ clientX, clientY })=>{
 
 		thread.transfer("move", { clientX, clientY });
 
