@@ -176,9 +176,9 @@ export default class Threadizer extends EventManager {
 			}
 			else {
 
-				this.dispatch(type, data, ( done = true )=>{
+				this.dispatch(type, data, ( data )=>{
 
-					this.dispatch(`transfer-answer-${ id }`, { done, id });
+					this.dispatch(`transfer-answer-${ id }`, data);
 
 				});
 

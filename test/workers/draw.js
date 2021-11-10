@@ -1,18 +1,18 @@
-console.log("Worker 'draw' started");
+console.log("Job 'draw' started - worker", !!self.isWorker);
 
 let canvas = null;
 let context = null;
 
 thread.on("pipe", ({ detail, complete })=>{
 
-	if( !canvas && detail instanceof OffscreenCanvas ){
+	if( detail instanceof self.OffscreenCanvas || (self.HTMLCanvasElement !== undefined && detail instanceof self.HTMLCanvasElement) ){
 
-		canvas = detail;
-		context = canvas.getContext("2d");
+		if( !canvas ){
 
-	}
+			canvas = detail;
+			context = canvas.getContext("2d");
 
-	if( detail instanceof OffscreenCanvas ){
+		}
 
 		const text = thread.isWorker ? "OffscreenCanvas painted within a worker" : "OffscreenCanvas painted within main thread";
 
@@ -26,7 +26,6 @@ thread.on("pipe", ({ detail, complete })=>{
 		});
 
 		context.fillText(text, canvas.width / 2, canvas.height / 2, canvas.width);
-
 
 	}
 	else if( detail instanceof ImageData ){

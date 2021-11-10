@@ -5,5 +5,25 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<title><%= htmlWebpackPlugin.options.title %></title>
 	</head>
-	<body></body>
+	<body>
+		<p>external file</p>
+		<section style="display: flex;">
+			<div id="ExternalWorker">
+				<p>in worker</p>
+			</div>
+			<div id="ExternalMain">
+				<p>on main thread</p>
+			</div>
+		</section>
+		<p>inline function</p>
+		<section style="display: flex;">
+			<div id="InlineWorker">
+				<p>in worker</p>
+			</div>
+			<div id="InlineMain">
+				<p>on main thread</p>
+			</div>
+		</section>
+		<button style="display: block;">Freeze</button>
+	</body>
 </html>

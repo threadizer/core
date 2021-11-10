@@ -1,8 +1,6 @@
-console.log("Worker 'invert' started");
+console.log("Job 'invert' started - worker: ", !!self.isWorker);
 
 thread.on("pipe", ({ detail: imageData, complete })=>{
-
-	console.log("invert pipe", imageData);
 
 	for( let index = 0; index < imageData.data.length; index += 4 ){
 
