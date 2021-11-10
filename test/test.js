@@ -2,6 +2,7 @@ import Threadizer, { Stream } from "@/index.js";
 
 document.addEventListener("DOMContentLoaded", async ()=>{
 
+	// Canvas drawing
 	const canvas = document.createElement("canvas");
 
 	document.body.appendChild(canvas);
@@ -14,12 +15,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
 	mainThread.transfer("setup-canvas", offscreenCanvas);
 
-	// const linkThread = await Threadizer.link(window.location.href + "link.worker.js");
-
-	// linkThread.log();
-
-	// console.log("THREAD RETURNED", linkThread);
-
+	// Simple text stream
 	const textStream = new Stream("hello world!");
 
 	const textThread = await new Threadizer(window.location.href + "simple-pipe.worker.js");
