@@ -69,9 +69,21 @@ async function runTextScript( inMainThread = false){
 
 };
 
+async function runCloneScript( inMainThread = false ){
+
+	const thread = await new Threadizer(()=>{
+
+		console.log("Job - 'clone' started", !!self.isWorker);
+
+	}, null, inMainThread);
+
+	await thread.clone();
+
+};
+
 document.addEventListener("DOMContentLoaded", async ()=>{
 
-	// Canvas drawing
+	// // Canvas drawing
 	runExternalScript("#ExternalWorker");
 	runExternalScript("#ExternalMain", true);
 
@@ -81,6 +93,10 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 	// Simple text stream
 	runTextScript();
 	runTextScript(true);
+
+	// Cloning
+	runCloneScript();
+	runCloneScript(true);
 
 	// Freeze button
 	const button = document.querySelector("button");
