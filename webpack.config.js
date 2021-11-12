@@ -1,4 +1,3 @@
-const { hostname } = require("os");
 const { resolve, parse } = require("path");
 const { readdirSync } = require("fs");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
@@ -14,7 +13,7 @@ module.exports = ( env, options )=>{
 	const TEST_PATH = resolve(__dirname, "test");
 	const BUILD_PATH = resolve(__dirname, "build");
 
-	const HOST = hostname().toLowerCase();
+	const HOST = "0.0.0.0";
 
 	const server = {
 		allowedHosts: "all",
@@ -32,7 +31,7 @@ module.exports = ( env, options )=>{
 		historyApiFallback: true,
 		host: HOST,
 		hot: true,
-		https: true,
+		https: false,
 		open: true,
 		static: {
 			directory: BUILD_PATH,
