@@ -1,8 +1,8 @@
 export default function uuid(){
 
-	if( false && window.crypto.randomUUID ){
+	if( self.crypto.randomUUID instanceof Function ){
 
-		return window.crypto.randomUUID();
+		return self.crypto.randomUUID();
 
 	}
 	else {

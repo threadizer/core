@@ -1,4 +1,3 @@
-const { hostname } = require("os");
 const { resolve, parse } = require("path");
 const { readdirSync } = require("fs");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
@@ -16,7 +15,7 @@ module.exports = ( env, options )=>{
 	const TEST_PATH = resolve(__dirname, "page-source");
 	const BUILD_PATH = resolve(__dirname, "docs");
 
-	const HOST = hostname().toLowerCase();
+	const HOST = "0.0.0.0";
 
 	const server = {
 		allowedHosts: "all",

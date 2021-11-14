@@ -1,10 +1,13 @@
 export default class Stream {
 	#data = null;
 	#pipes = new Array();
+	#auto = true;
 	#running = false;
-	constructor( data ){
+	constructor( data, auto = true ){
 
 		this.#data = data;
+
+		this.#auto = auto;
 
 		return this;
 
@@ -15,7 +18,11 @@ export default class Stream {
 
 			this.#createPipe(destination);
 
-			await this.#run();
+			if( this.#auto ){
+
+				await this.run();
+
+			}
 
 			resolve(this.#data);
 
@@ -37,7 +44,7 @@ export default class Stream {
 		this.#pipes.push(destination);
 
 	}
-	async #run(){
+	async run(){
 
 		if( !this.#running && this.#pipes.length ){
 
@@ -49,9 +56,26 @@ export default class Stream {
 
 			this.#running = false;
 
-			await this.#run();
+			await this.run();
+
+			return this.#data;
 
 		}
+
+	}
+	async clone(){
+
+		const clone = new Stream(this.#data, false);
+
+		for( let pipe of this.#pipes ){
+
+			const pipeClone = await pipe.clone();
+
+			clone.pipe(pipeClone);
+
+		}
+
+		return clone;
 
 	}
 }

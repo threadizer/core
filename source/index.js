@@ -1,27 +1,30 @@
 import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
 import Stream from "@/components/stream.js";
-import generateTransferables from "@/components/generate-transferables.js";
-import uuid from "@/components/uuid.js";
+import Pool from "@/components/pool.js";
+import generateTransferables from "@/tools/generate-transferables.js";
+import uuid from "@/tools/uuid.js";
 
-export { Stream };
+export { Stream, Pool };
 
 export default class Threadizer extends EventManager {
 	#id = null;
-	#application = null;
+	#application = { source: null, extension: null, compiled: null };
 	#insideMainThread = false;
 	#worker = null;
-	constructor( application, extension, insideMainThread ){
+	constructor( application, extension, insideMainThread = false ){
 
 		super();
 
 		this.#id = `__threadizer_${ uuid() }`;
 
+		this.#insideMainThread = !!insideMainThread;
+
 		return new Promise(async ( resolve )=>{
 
 			if( application ){
 
-				await this.compile(application, extension, insideMainThread);
+				await this.compile(application, extension);
 				await this.run();
 
 			}
@@ -36,34 +39,35 @@ export default class Threadizer extends EventManager {
 		return this.#worker instanceof Worker;
 
 	}
-	async compile( application, extension, insideMainThread = false ){
+	async compile( application, extension ){
 
-		this.#insideMainThread = !!insideMainThread;
+		this.#application.source = application;
+		this.#application.extension = extension;
 
 		const tools = `{
 			uuid: ${ uuid.toString() },
 			generateTransferables: ${ generateTransferables.toString() }
 		}`;
 
-		if( !insideMainThread ){
+		if( !this.#insideMainThread ){
 
-			if( application instanceof Function ){
+			if( this.#application.source instanceof Function ){
 
-				application = `(${ application.toString() })(self)`;
-
-			}
-			else if( typeof application === "string" ){
-
-				application = await fetch(application).then(response => response.text());
+				this.#application.compiled = `/* application */(${ this.#application.source.toString() })(self)`;
 
 			}
+			else if( typeof this.#application.source === "string" ){
 
-			this.#application = `(function(){
+				this.#application.compiled = await fetch(this.#application.source).then(response => response.text());
+
+			}
+
+			this.#application.compiled = `(function(){
 
 				(${ WorkerManager })(self, ${ tools }, ${ extension }).then(function(){
 
 					/* application */
-					${ application }
+					${ this.#application.compiled }
 
 				});
 
@@ -72,18 +76,18 @@ export default class Threadizer extends EventManager {
 		}
 		else {
 
-			if( application instanceof Function ){
+			if( this.#application.source instanceof Function ){
 
-				application = `(${ application.toString() })(thread)`;
-
-			}
-			else if( typeof application === "string" ){
-
-				application = await fetch(application).then(response => response.text());
+				this.#application.compiled = `(${ this.#application.source.toString() })(thread)`;
 
 			}
+			else if( typeof this.#application.source === "string" ){
 
-			this.#application = `window["${ this.#id }"] = function( thread ){
+				this.#application.compiled = await fetch(this.#application.source).then(response => response.text());
+
+			}
+
+			this.#application.compiled = `window["${ this.#id }"] = function( thread ){
 
 				var extension = ${ extension };
 
@@ -94,7 +98,7 @@ export default class Threadizer extends EventManager {
 				}
 
 				/* application */
-				${ application }
+				${ this.#application.compiled }
 
 				thread.worker = window["${ this.#id }"];
 
@@ -102,7 +106,7 @@ export default class Threadizer extends EventManager {
 
 		}
 
-		return this.#application;
+		return this;
 
 	}
 	async run(){
@@ -111,7 +115,7 @@ export default class Threadizer extends EventManager {
 
 			this.#worker = await new Promise(( resolve )=>{
 
-				const blob = new Blob([this.#application], { type: "text/javascript" });
+				const blob = new Blob([this.#application.compiled], { type: "text/javascript" });
 
 				const url = URL.createObjectURL(blob);
 
@@ -142,7 +146,7 @@ export default class Threadizer extends EventManager {
 		}
 		else {
 
-			eval(this.#application);
+			eval(this.#application.compiled);
 
 			window[this.#id](this);
 
@@ -178,15 +182,20 @@ export default class Threadizer extends EventManager {
 			}
 			else {
 
-				this.dispatch(type, data, ( done = true )=>{
+				this.dispatch(type, data, ( data )=>{
 
-					this.dispatch(`transfer-answer-${ id }`, { done, id });
+					this.dispatch(`transfer-answer-${ id }`, data);
 
 				});
 
 			}
 
 		});
+
+	}
+	async clone(){
+
+		return await new Threadizer(this.#application.source, this.#application.extension, this.#insideMainThread);
 
 	}
 	async close( maxTimeout = 3000 ){
@@ -212,6 +221,11 @@ export default class Threadizer extends EventManager {
 	static createStream( data ){
 
 		return new Stream(data);
+
+	}
+	static createPool( thread, count ){
+
+		return new Pool(thread, count);
 
 	}
 }
