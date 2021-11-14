@@ -3,15 +3,22 @@
 @import "†/assets/styles/code-highlight.scss";
 
 $blue: #456DA0;
+$light-blue: #7094C2;
 $clear: #EFEFEF;
 $dark: #222;
+$darker: #111;
 
 html {
 	font-family: "Fira Code";
 	font-size: 10px;
 	background-color: $clear;
 
-	@media screen and (max-width: 400px){
+	@media (prefers-color-scheme: dark) {
+		color: #CCC;
+		background-color: $dark;
+	}
+
+	@media screen and (max-width: 400px) {
 		font-size: 8px;
 	}
 
@@ -111,6 +118,10 @@ html {
 					font-family: "Fira Code Bolder";
 					font-size: 3rem;
 					color: #333;
+
+					@media (prefers-color-scheme: dark) {
+						color: #CCC;
+					}
 				}
 
 				.content {
@@ -127,6 +138,10 @@ html {
 							border-radius: 1rem;
 							background-color: #FFF;
 
+							@media (prefers-color-scheme: dark) {
+								background-color: $darker;
+							}
+
 							&::before {
 								content: "⚠️";
 								display: inline-block;
@@ -138,6 +153,10 @@ html {
 
 						a {
 							color: $blue;
+
+							@media (prefers-color-scheme: dark) {
+								color: $light-blue;
+							}
 						}
 					}
 
@@ -164,6 +183,10 @@ html {
 			align-items: center;
 			padding: 5rem;
 			color: $dark;
+
+			@media (prefers-color-scheme: dark) {
+				color: $clear;
+			}
 
 			img {
 				display: inline-block;
