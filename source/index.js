@@ -1,10 +1,11 @@
 import EventManager from "@/components/event-manager.js";
 import WorkerManager from "@/components/worker-manager.js";
 import Stream from "@/components/stream.js";
-import generateTransferables from "@/components/generate-transferables.js";
-import uuid from "@/components/uuid.js";
+import Pool from "@/components/pool.js";
+import generateTransferables from "@/tools/generate-transferables.js";
+import uuid from "@/tools/uuid.js";
 
-export { Stream };
+export { Stream, Pool };
 
 export default class Threadizer extends EventManager {
 	#id = null;
@@ -218,6 +219,11 @@ export default class Threadizer extends EventManager {
 	static createStream( data ){
 
 		return new Stream(data);
+
+	}
+	static createPool( thread, count ){
+
+		return new Pool(thread, count);
 
 	}
 }

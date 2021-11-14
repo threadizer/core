@@ -1,4 +1,4 @@
-import Threadizer, { Stream } from "@/index.js";
+import Threadizer, { Stream, Pool } from "@/index.js";
 
 async function runExternalScript( containerSelector, inMainThread = false ){
 
@@ -97,16 +97,30 @@ async function runCloneScript( inMainThread = false ){
 
 };
 
+async function runPoolScript( inMainThread = false ){
+
+	const thread = await new Threadizer(window.location.href + "pool.worker.js", null, inMainThread);
+
+	const pool = await new Pool(thread);
+
+	for( let index = 0; index < 10; index++ ){
+
+		pool.transfer("test", { index, inMainThread });
+
+	};
+
+}
+
 document.addEventListener("DOMContentLoaded", async ()=>{
 
-	// // Canvas drawing
+	// Canvas drawing
 	runExternalScript("#ExternalWorker");
 	runExternalScript("#ExternalMain", true);
 
 	runInlineScript("#InlineWorker");
 	runInlineScript("#InlineMain", true);
 
-	// // Simple text stream
+	// Simple text stream
 	runTextScript();
 	runTextScript(true);
 
@@ -114,9 +128,13 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 	runTextScriptClone();
 	runTextScriptClone(true);
 
-	// // Cloning
+	// Cloning
 	runCloneScript();
 	runCloneScript(true);
+
+	// Pool
+	runPoolScript();	
+	runPoolScript(true);	
 
 	// Freeze button
 	const button = document.querySelector("button");
