@@ -69,6 +69,22 @@ async function runTextScript( inMainThread = false){
 
 };
 
+async function runTextScriptClone( inMainThread = false){
+
+	const textStream = new Stream("hello world!", false);
+
+	const textThread = await new Threadizer(window.location.href + "simple-pipe.worker.js", null, inMainThread);
+
+	textStream.pipe(textThread);
+
+	const clone = await textStream.clone();
+
+	const results = await clone.run();
+
+	console.log("OUTPUT RESULTS CLONE --->", results); // Output "!dlrow olleh"
+
+};
+
 async function runCloneScript( inMainThread = false ){
 
 	const thread = await new Threadizer(()=>{
@@ -90,11 +106,15 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 	runInlineScript("#InlineWorker");
 	runInlineScript("#InlineMain", true);
 
-	// Simple text stream
+	// // Simple text stream
 	runTextScript();
 	runTextScript(true);
 
-	// Cloning
+	// Simple text stream clone
+	runTextScriptClone();
+	runTextScriptClone(true);
+
+	// // Cloning
 	runCloneScript();
 	runCloneScript(true);
 
