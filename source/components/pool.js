@@ -24,7 +24,16 @@ export default class Pool {
 		});
 
 	}
-	async transfer( type, data ){
+	transfer( type, data ){
+
+		return new Promise(( resolve )=>{
+
+			this.#next(type, data, resolve);
+
+		});
+
+	}
+	async #next( type, data, callback ){
 
 		const available = this.#threads.find(({ busy }) => !busy);
 
@@ -32,22 +41,24 @@ export default class Pool {
 
 			available.busy = true;
 
-			await available.thread.transfer(type, data);
+			const output = await available.thread.transfer(type, data);
 
 			available.busy = false;
 
+			callback(output);
+
 			if( this.#pending.length ){
 
-				const { type, data } = this.#pending.shift();
+				const { type, data, callback } = this.#pending.shift();
 
-				this.transfer(type, data);
+				this.#next(type, data, callback);
 
 			}
 
 		}
 		else {
 
-			this.#pending.push({ type, data });
+			this.#pending.push({ type, data, callback });
 
 		}
 
