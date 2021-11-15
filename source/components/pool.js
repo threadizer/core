@@ -9,9 +9,11 @@ export default class Pool {
 
 		}
 
+		this.#threads.push({ thread, busy: false });
+
 		return new Promise(async ( resolve )=>{
 
-			for( let index = 0; index < count; index++ ){
+			for( let index = 1; index < count; index++ ){
 
 				const clone = await thread.clone();
 
@@ -66,6 +68,20 @@ export default class Pool {
 	clone(){
 
 		return new Pool(this.#threads[0].thread, this.#threads.length);
+
+	}
+	destroy(){
+
+		for( let { thread } of this.#threads ){
+
+			thread.destroy();
+
+		}
+
+		this.#threads.length = 0;
+		this.#pending.length = 0;
+
+		return this;
 
 	}
 };
