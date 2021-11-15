@@ -16,7 +16,7 @@ export default async ( unmount )=>{
 
 	});
 
-	const pool = await Threadizer.createPool(thread);
+	const pool = await Threadizer.createPool(thread, 6);
 
 	let done = 0;
 
@@ -26,11 +26,15 @@ export default async ( unmount )=>{
 
 			done++;
 
-			console.log(done, index, output);
+			console.log(index, output);
 
 			if( done === length ){
 
-				console.log("all done");
+				console.log("Pool completed");
+
+				pool.destroy();
+
+				unmount();
 
 			}
 
@@ -38,10 +42,11 @@ export default async ( unmount )=>{
 
 	}
 
-	// unmount();
 
 	return {
 		destroy: ()=>{
+
+			pool.destroy();
 
 			unmount();
 

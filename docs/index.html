@@ -475,9 +475,45 @@
 			<section>
 				<h2>Pool</h2>
 				<div class="content">
-					<p>Pool details</p>
+					<p>In some cases, you need to execute a same thread for different inputs. Thats where pools help. It clone the thread you give as much as you requested. Then, using the <span class="hljs-inline">transfer</span> method will send it to an available thread or wait until one become available again.</p>
+					<p>The second parameter define how many threads are created in the pool.</p>
+					<p class="warning">By default, the number of created threads is equal to <span class="hljs-inline">navigator.hardwareConcurrency</span> (or 8 on unsupported browsers). Also you shall avoid using more threads then the CPU got logic threads to limit concurrency.</p>
 					<pre class="full javascript" data-script="pool">
+						import Threadizer from "@threadizer/core";
 
+						const thread = await new Threadizer(()=>{
+
+							self.on("encode", async ({ detail, complete })=>{
+
+								await new Promise(resolve => setTimeout(resolve, 100));
+
+								complete(self.btoa(detail));
+
+							});
+
+						});
+
+						const pool = await Threadizer.createPool(thread, 6);
+
+						let done = 0;
+
+						for( let index = 0, length = 100; index < length; index++ ){
+
+							pool.transfer("encode", `${ index } Hello World!`).then(( output )=>{
+
+								done++;
+
+								console.log(done, index, output);
+
+								if( done === length ){
+
+									console.log("all done");
+
+								}
+
+							});
+
+						}
 					</pre>
 					<a class="run-code console"></a>
 				</div>
