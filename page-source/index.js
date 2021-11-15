@@ -8,6 +8,7 @@ const EXAMPLES = {
 	"performance-worker": require("†/examples/performance-worker.js").default,
 	"performance-main-thread": require("†/examples/performance-main-thread.js").default,
 	"stream": require("†/examples/stream.js").default,
+	"pool": require("†/examples/pool.js").default,
 	"playground": require("†/examples/playground.js").default
 };
 
