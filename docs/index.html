@@ -421,6 +421,58 @@
 				</div>
 			</section>
 			<section>
+				<h2>Stream</h2>
+				<div class="content">
+					<p>You may need to use multiple dedicated threads to execute diffent jobs. Stream is here to make this job easier, it automaticaly listen to the <span class="hljs-inline">complete</span> callback and send it to the next <span class="hljs-inline">pipe</span>.</p>
+					<p>Then you can use the whole set of pipes as a big <span class="hljs-inline">Promise</span> and get the output data.</p>
+					<pre class="full javascript" data-script="stream">
+						import Threadizer from "@threadizer/core";
+
+						const randomData = window.btoa(window.location.href);
+
+						const stream = Threadizer.createStream(randomData);
+
+						const resolveThread = await new Threadizer(()=>{
+
+							self.on("pipe", ({ detail, complete })=>{
+
+								console.log("resolve pipe");
+
+								complete(self.atob(detail));
+
+							});
+
+						});
+
+						const fetchThread = await new Threadizer(()=>{
+
+							self.on("pipe", async ({ detail, complete })=>{
+
+								console.log("fetch pipe");
+
+								const page = await fetch(detail).then(response => response.text());
+
+								complete({
+									ok: response.ok,
+									url: response.url,
+									type: response.type,
+									status: response.status,
+									redirected: response.redirected,
+									content: page
+								});
+
+							});
+
+						});
+
+						const page = await stream.pipe(encodeThread).pipe(sendThread);
+
+						console.log(page);
+					</pre>
+					<a class="run-code console"></a>
+				</div>
+			</section>
+			<section>
 				<h2>Playground</h2>
 				<div class="content">
 					<p>The code below is editable, it will be executed inside a worker:</p>

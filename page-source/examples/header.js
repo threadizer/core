@@ -99,14 +99,14 @@ export default async ( container )=>{
 				new THREE.Color(0xFA929E),
 				new THREE.Color(0xF4C175),
 				new THREE.Color(0xF2D461)
-			], 2);
+			], 1);
 
 			bottom = generatePlane([
 				new THREE.Color(0x0BD6FB),
 				new THREE.Color(0x4DC9F8),
 				new THREE.Color(0x90A7EF),
 				new THREE.Color(0xA799EB)
-			], -2);
+			], -1);
 
 			middle = generatePlane([
 				new THREE.Color(0x90A7EF),
@@ -229,7 +229,7 @@ export default async ( container )=>{
 	});
 
 	// Transfer mousemove event to worker thread through "move" event
-	canvas.addEventListener("mousemove", ({ clientX, clientY })=>{
+	window.addEventListener("mousemove", ({ clientX, clientY })=>{
 
 		thread.transfer("move", { clientX, clientY });
 
