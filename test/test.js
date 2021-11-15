@@ -111,6 +111,28 @@ async function runPoolScript( inMainThread = false ){
 
 }
 
+async function runAddLibraryScript( inMainThread = false ){
+
+	await Threadizer.addLibrary(()=>{
+
+		self.THREE = {
+			"library": true
+		};
+
+	});
+
+	await new Threadizer(()=>{
+
+		console.log("=>", self.THREE, self.TEST);
+
+	}, ()=>{
+
+		self.TEST = { extension: true };
+
+	}, inMainThread);
+
+}
+
 document.addEventListener("DOMContentLoaded", async ()=>{
 
 	// Canvas drawing
@@ -133,8 +155,12 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 	runCloneScript(true);
 
 	// Pool
-	runPoolScript();	
-	runPoolScript(true);	
+	runPoolScript();
+	runPoolScript(true);
+
+	// Add library
+	runAddLibraryScript();
+	runAddLibraryScript(true);
 
 	// Freeze button
 	const button = document.querySelector("button");

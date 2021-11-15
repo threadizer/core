@@ -7,18 +7,22 @@ import uuid from "@/tools/uuid.js";
 
 export { Stream, Pool };
 
+const LIBRARIES = new Array();
+
 export default class Threadizer extends EventManager {
 	#id = null;
-	#application = { source: null, extension: null, compiled: null };
+	#application = { source: null, extensions: [null], compiled: null };
 	#insideMainThread = false;
 	#worker = null;
-	constructor( application, extension, insideMainThread = false ){
+	constructor( application, extension = null, insideMainThread = false ){
 
 		super();
 
 		this.#id = `__threadizer_${ uuid() }`;
 
 		this.#insideMainThread = !!insideMainThread;
+
+		this.#application.extensions.push(...LIBRARIES);
 
 		return new Promise(async ( resolve )=>{
 
@@ -39,15 +43,18 @@ export default class Threadizer extends EventManager {
 		return this.#worker instanceof Worker;
 
 	}
-	async compile( application, extension ){
+	async compile( application, extension = null ){
 
 		this.#application.source = application;
-		this.#application.extension = extension;
+
+		this.#application.extensions[0] = extension;
 
 		const tools = `{
 			uuid: ${ uuid.toString() },
 			generateTransferables: ${ generateTransferables.toString() }
 		}`;
+
+		const extensions = `[${ this.#application.extensions.filter(ext => ext).map(ext => ext?.toString()).join(",") }]`;
 
 		if( !this.#insideMainThread ){
 
@@ -64,8 +71,9 @@ export default class Threadizer extends EventManager {
 
 			this.#application.compiled = `(function(){
 
-				(${ WorkerManager })(self, ${ tools }, ${ extension }).then(function(){
+				(${ WorkerManager })(self, ${ tools }, ${ extensions }).then(function(){
 
+					/* application */
 					${ this.#application.compiled }
 
 				});
@@ -88,14 +96,15 @@ export default class Threadizer extends EventManager {
 
 			this.#application.compiled = `window["${ this.#id }"] = function( thread ){
 
-				var extension = ${ extension };
+				var extensions = ${ extensions };
 
-				if( extension instanceof Function ){
+				for( let extension of extensions ){
 
 					extension(thread);
 
 				}
 
+				/* application */
 				${ this.#application.compiled }
 
 				thread.worker = window["${ this.#id }"];
@@ -214,6 +223,24 @@ export default class Threadizer extends EventManager {
 		this.off();
 
 		return this;
+
+	}
+	static async addLibrary( library ){
+
+		if( library instanceof Function ){
+
+			library = library.toString();
+
+		}
+		else {
+
+			library = await fetch(library).then(response => response.text());
+
+		}
+
+		LIBRARIES.push(library);
+
+		return Threadizer;
 
 	}
 	static createStream( data ){

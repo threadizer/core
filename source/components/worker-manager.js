@@ -1,4 +1,4 @@
-export default function( self, tools, extension ){
+export default function( self, tools, extensions ){
 
 	Object.assign(self, { thread: self }, tools);
 
@@ -102,7 +102,7 @@ export default function( self, tools, extension ){
 
 		});
 
-		if( extension instanceof Function ){
+		for( let extension of extensions ){
 
 			await extension(self);
 
