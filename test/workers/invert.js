@@ -1,4 +1,4 @@
-console.log("Job 'invert' started - worker: ", !!self.isWorker);
+console.log("Job 'invert' started - worker: ", !!thread.isWorker);
 
 thread.on("pipe", ({ detail: imageData, complete })=>{
 

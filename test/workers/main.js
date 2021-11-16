@@ -1,6 +1,6 @@
 import Threadizer from "@/index.js";
 
-console.log("Job main started - worker: ", !!self.isWorker);
+console.log("Job main started - worker: ", !!thread.isWorker);
 
 thread.on("setup-canvas", async ({ detail: canvas, complete })=>{
 
