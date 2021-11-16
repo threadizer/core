@@ -48,11 +48,6 @@ module.exports = ( env, options )=>{
 
 	const plugins = [
 		new WebpackShellPlugin({
-			onBeforeBuild: {
-				scripts: [`rm -rf ${ BUILD_PATH }`],
-				blocking: true,
-				parallel: false
-			},
 			onBuildExit: {
 				scripts: [`touch ${ BUILD_PATH }/.${ version }`],
 				blocking: true,
