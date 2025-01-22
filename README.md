@@ -19,7 +19,7 @@ import Threadizer from "@threadizer/core";
 
 // ...
 
-const thread = new Threadizer(( thread )=>{
+const thread = await new Threadizer(( thread )=>{
 
 	console.log("Worker initialized", thread);
 
